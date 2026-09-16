@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visor de Servicios y Agenda - Consultorio</title>
+  <style>
+    /* RESET & ESTILOS BASE */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f4f7f9;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ENCABEZADO / NAVBAR */
+    header {
+      background-color: #0d3b66;
+      color: #ffffff;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      background-color: #00a896;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1.2rem;
+      color: #fff;
+    }
+
+    .brand-title h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .brand-title p {
+      font-size: 0.8rem;
+      color: #a0c4e2;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      background-color: #00a896;
+      color: white;
+      border: none;
+      padding: 0.55rem 1.1rem;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn:hover {
+      background-color: #028090;
+    }
+
+    .btn-secondary {
+      background-color: transparent;
+      border: 1px solid #a0c4e2;
+      color: #ffffff;
+    }
+
+    .btn-secondary:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* CONTENEDOR PRINCIPAL */
+    main {
+      flex: 1;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e1e8ed;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 1rem 1.5rem;
+      background-color: #ffffff;
+      border-bottom: 1px solid #e1e8ed;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-header h2 {
+      font-size: 1rem;
+      color: #0d3b66;
+      font-weight: 600;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: #2e7d32;
+      background-color: #e8f5e9;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #2e7d32;
+      border-radius: 50%;
+    }
+
+    /* IFRAME / CONTENEDOR DEL EXCEL */
+    .spreadsheet-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-height: 600px;
+      flex: 1;
+      background-color: #f8f9fa;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    /* FOOTER */
+    footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.85rem;
+      color: #6c757d;
+      background-color: #ffffff;
+      border-top: 1px solid #e1e8ed;
+    }
+
+    /* RESPONSIVO */
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+      .header-actions {
+        width: 100%;
+        justify-content: space-between;
+      }
+      main {
+        padding: 0.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ENCABEZADO -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">C</div>
+      <div class="brand-title">
+        <h1>Consultorio Profesional</h1>
+        <p>Sistema de Consulta e Información</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-secondary" onclick="reloadFrame()">Actualizar</button>
+      <a href="https://docs.google.com/spreadsheets/d/1Dk8AQJkmUm5RhwUfeZVPg1VGM8_3oD_SdPvhwXF9Mfs/edit?gid=0#gid=0" target="_blank" class="btn">Abrir en Google Sheets ↗</a>
+    </div>
+  </header>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main>
+    <div class="card">
+      <div class="card-header">
+        <h2>Panel de Información</h2>
+        <div class="status-badge">
+          <span class="status-dot"></span>
+          Conectado en vivo
+        </div>
+      </div>
+      <div class="spreadsheet-container">
+        <!-- Google Sheets embebido en modo previa/publicado -->
+        <iframe 
+          id="sheetFrame"
+          src="https://docs.google.com/spreadsheets/d/1Dk8AQJkmUm5RhwUfeZVPg1VGM8_3oD_SdPvhwXF9Mfs/preview?gid=0" 
+          allowfullscreen>
+        </iframe>
+      </div>
+    </div>
+  </main>
+
+  <!-- PIE DE PÁGINA -->
+  <footer>
+    &copy; <span id="year"></span> Consultorio. Todos los derechos reservados.
+  </footer>
+
+  <!-- JAVASCRIPT -->
+  <script>
+    // Configurar año automático en el footer
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Función para recargar el iframe sin refrescar toda la página
+    function reloadFrame() {
+      const iframe = document.getElementById('sheetFrame');
+      const currentSrc = iframe.src;
+      iframe.src = '';
+      setTimeout(() => {
+        iframe.src = currentSrc;
+      }, 100);
+    }
+  </script>
+</body>
+</html>
