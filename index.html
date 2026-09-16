@@ -2,89 +2,90 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Consultorio - Sistema de Datos</title>
-    
-    <!-- CONFIGURACIÓN PWA Y WEB MOBILE -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultorio - Sistema de Historias y Citas</title>
+
     <link rel="apple-touch-icon" href="icono.png">
     <link rel="icon" href="icono.png" type="image/png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Consultorio">
 
     <style>
-        /* === VARIABLES DE COLOR Y ESTILOS DE CONSULTORIO === */
         :root {
             --primary-color: #0d3b66;
-            --primary-bg: #e8f1f5;
-            
+            --primary-hover: #0a2d4f;
             --secondary-color: #00a896;
-            --secondary-bg: #e6f6f5;
-            
-            --active-color: var(--primary-color);
-            --active-bg: var(--primary-bg);
-            
-            --text-color: #2b2d42;
-            --page-bg: #f4f7f9;
+            --accent-bg: #eef5f9;
+            --border-color: #e2e8f0;
+            --text-main: #2d3748;
+            --text-muted: #718096;
+            --page-bg: #f8fafc;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--page-bg);
-            color: var(--text-color);
-            margin: 0;
-            padding: 15px;
+            color: var(--text-main);
+            padding: 24px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            transition: background-color 0.3s;
         }
 
-        .header {
+        /* CONTENEDOR PRINCIPAL QUE CONTROLA EL ANCHO */
+        .app-container {
             width: 100%;
-            max-width: 1000px;
+            max-width: 1400px; /* Ancho amplio para monitores de escritorio */
             display: flex;
             flex-direction: column;
-            align-items: center;
-            margin-bottom: 20px;
-            gap: 15px;
+            gap: 20px;
         }
-        
-        .title-bar {
-            width: 100%;
+
+        /* ENCABEZADO Y BARRA SUPERIOR */
+        header {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 16px 24px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid #e1e8ed;
-            padding-bottom: 12px;
         }
 
         .brand {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
 
         .brand-avatar {
-            width: 36px;
-            height: 36px;
-            background-color: var(--secondary-color);
+            width: 40px;
+            height: 40px;
+            background-color: var(--primary-color);
             color: white;
-            font-weight: bold;
+            font-weight: 700;
             font-size: 1.2rem;
-            border-radius: 8px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        h1 {
+        .brand-info h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
             color: var(--primary-color);
-            margin: 0;
-            font-size: 1.3rem;
-            font-weight: 800;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
+            line-height: 1.2;
+        }
+
+        .brand-info p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
         }
 
         .header-actions {
@@ -94,239 +95,218 @@
         }
 
         .action-btn {
-            background: white;
-            border: 1px solid #ddd;
-            color: #555;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             text-decoration: none;
         }
 
-        .action-btn:hover, .action-btn:active {
-            background: #f0f0f0;
-            color: var(--active-color);
-            border-color: var(--active-color);
+        .action-btn:hover {
+            background: var(--accent-bg);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
         }
 
         .action-btn svg {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
         }
 
-        .action-btn.reload-btn:hover, .action-btn.reload-btn:active {
-            transform: rotate(90deg);
-        }
-        
-        /* === PANEL DE MÉTRICAS === */
-        .metrics-container {
-            background-color: var(--active-bg);
-            border: 2px solid var(--active-color);
-            padding: 15px 10px;
+        /* BARRA DE HERRAMIENTAS / CONTROLES EN DASHBOARD */
+        .controls-card {
+            background: #ffffff;
             border-radius: 12px;
+            padding: 16px 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            width: 100%;
-            max-width: 600px;
-            gap: 5px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            box-sizing: border-box;
-            transition: all 0.3s;
+            gap: 16px;
+            flex-wrap: wrap;
         }
 
-        .metric-block {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            flex: 1;
-        }
-
-        .metric-divider {
-            width: 2px;
-            height: 40px;
-            background-color: var(--active-color);
-            opacity: 0.3;
-            transition: background-color 0.3s;
-        }
-
-        .metric-title {
-            font-weight: 800;
-            color: var(--active-color);
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            margin-bottom: 5px;
-            transition: color 0.3s;
-        }
-
-        .metric-value {
-            font-weight: 900;
-            font-size: 1.3rem;
-            color: #111;
-        }
-
-        /* === BARRA DE BÚSQUEDA === */
+        /* BUSCADOR */
         .search-container {
-            width: 100%;
+            flex: 1;
+            min-width: 280px;
             position: relative;
-            margin-top: 5px;
-            transition: all 0.3s;
         }
 
         .search-input {
             width: 100%;
-            padding: 14px 45px 14px 45px; 
-            border: 2px solid #ddd;
+            padding: 10px 40px 10px 40px;
+            border: 1px solid var(--border-color);
             border-radius: 8px;
-            font-size: 1rem;
-            font-family: inherit;
-            box-sizing: border-box;
+            font-size: 0.95rem;
             outline: none;
-            transition: all 0.3s;
-            color: #333;
-            background-color: white;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+            transition: border-color 0.2s;
+            background-color: #fafafa;
         }
 
         .search-input:focus {
-            border-color: var(--active-color);
-            box-shadow: 0 0 0 4px var(--active-bg);
+            border-color: var(--primary-color);
+            background-color: #ffffff;
         }
 
         .search-icon {
             position: absolute;
-            left: 15px;
+            left: 12px;
             top: 50%;
             transform: translateY(-50%);
-            width: 20px;
-            height: 20px;
-            color: #999;
-            transition: color 0.3s;
+            width: 18px;
+            height: 18px;
+            color: var(--text-muted);
             pointer-events: none;
         }
 
-        .search-container:focus-within .search-icon {
-            color: var(--active-color);
-        }
-        
         .clear-search {
             position: absolute;
-            right: 15px;
+            right: 12px;
             top: 50%;
             transform: translateY(-50%);
-            width: 20px;
-            height: 20px;
-            color: #999;
+            width: 18px;
+            height: 18px;
+            color: var(--text-muted);
             cursor: pointer;
             display: none;
             align-items: center;
             justify-content: center;
-            transition: color 0.3s;
         }
 
-        .clear-search:hover {
-            color: var(--active-color);
-        }
-
-        /* === BOTÓN ACTUALIZAR DATOS === */
-        .refresh-btn {
-            background-color: var(--active-color); 
-            color: white;
-            border: none;
-            padding: 14px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 1rem;
-            width: 100%;
-            max-width: 1000px;
-            transition: background-color 0.3s;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.12);
+        /* MÉTRICAS COMPACTAS */
+        .metrics-group {
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 12px;
+            background: var(--accent-bg);
+            padding: 6px 16px;
+            border-radius: 8px;
+            border: 1px solid #dce7f0;
+        }
+
+        .metric-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .metric-title {
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-value {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--primary-color);
+        }
+
+        .metric-divider {
+            width: 1px;
+            height: 24px;
+            background-color: #cbd5e1;
+        }
+
+        /* BOTÓN ACTUALIZAR PRO */
+        .refresh-btn {
+            background-color: var(--primary-color);
+            color: #ffffff;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
             gap: 8px;
+            transition: background-color 0.2s ease;
         }
 
         .refresh-btn:hover {
-            filter: brightness(0.9);
+            background-color: var(--primary-hover);
         }
-        
-        /* === ESTILOS DE TABLA === */
-        .table-container {
+
+        /* TABLA PRINCIPAL */
+        .table-card {
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .table-responsive {
             width: 100%;
-            max-width: 1000px;
-            background: transparent; 
-            overflow: visible;
+            overflow-x: auto;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             text-align: left;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.08);
-            overflow: hidden;
-        }
-
-        th, td {
-            padding: 12px 15px;
-            border-bottom: 1px solid #ddd;
+            font-size: 0.9rem;
         }
 
         th {
-            background-color: var(--active-bg);
-            color: var(--active-color);
+            background-color: #f1f5f9;
+            color: var(--primary-color);
             font-weight: 700;
-            transition: all 0.3s;
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
         }
 
-        tr:hover {
-            background-color: #f9f9f9;
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: top;
+            line-height: 1.4;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background-color: #f8fafc;
         }
 
         .loading {
-            padding: 20px;
+            padding: 30px;
             text-align: center;
-            font-weight: bold;
-            color: var(--active-color);
-            background: white;
-            border-radius: 8px;
+            font-weight: 600;
+            color: var(--text-muted);
         }
 
-        /* === VISTA MÓVIL RESPONSIVA (CARDS) === */
-        @media (max-width: 768px) {
-            h1 { font-size: 1.1rem; }
-            
-            .metrics-container {
-                padding: 12px 5px;
-                gap: 5px;
+        /* RESPONSIVO PARA MÓVILES */
+        @media (max-width: 850px) {
+            body {
+                padding: 12px;
             }
-            .metric-title { font-size: 0.65rem; }
-            .metric-value { font-size: 1.1rem; }
-            .metric-divider { height: 35px; }
-            
-            .search-input {
-                font-size: 0.95rem;
-                padding: 12px 42px 12px 42px; 
+
+            .controls-card {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .metrics-group {
+                justify-content: space-around;
             }
 
             .refresh-btn {
-                font-size: 0.95rem;
-                padding: 12px;
-            }
-            
-            table {
-                background: transparent;
-                box-shadow: none;
+                justify-content: center;
             }
 
             table, thead, tbody, th, td, tr {
@@ -339,132 +319,121 @@
                 top: -9999px;
                 left: -9999px;
             }
-            
+
             tr {
-                margin-bottom: 15px; 
-                border: 1px solid #cfd8dc; 
-                border-top: 5px solid var(--active-color); 
-                border-radius: 12px; 
-                box-shadow: 0 4px 8px rgba(0,0,0,0.08); 
+                margin-bottom: 12px;
+                border: 1px solid var(--border-color);
+                border-top: 4px solid var(--primary-color);
+                border-radius: 10px;
                 background-color: #ffffff;
-                overflow: hidden;
-                transition: border-color 0.3s;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.02);
             }
-            
+
             td {
-                border: none;
-                border-bottom: 1px solid #f0f0f0; 
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                padding: 8px 12px; 
+                padding: 10px 14px;
+                border-bottom: 1px solid #f1f5f9;
                 text-align: right;
-                box-sizing: border-box;
-                word-wrap: break-word;
-                font-size: 0.9rem; 
-                color: #333; 
-            }
-
-            td:last-child {
-                border-bottom: 0;
             }
 
             td::before {
                 content: attr(data-label);
-                font-weight: 800; 
-                color: var(--active-color);
+                font-weight: 700;
+                color: var(--primary-color);
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                padding-right: 12px;
                 text-align: left;
-                padding-right: 10px;
-                flex-shrink: 0;
-                max-width: 45%;
-                font-size: 0.75rem; 
-                text-transform: uppercase; 
-                transition: color 0.3s;
             }
         }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div class="title-bar">
+    <div class="app-container">
+
+        <!-- CABECERA DE MARCA -->
+        <header>
             <div class="brand">
                 <div class="brand-avatar">C</div>
-                <h1>Consultorio</h1>
+                <div class="brand-info">
+                    <h1>Consultorio Médico</h1>
+                    <p>Visor de Historias y Registros Clínicos</p>
+                </div>
             </div>
-            
             <div class="header-actions">
-                <!-- BOTÓN ABRIR HOJA DE GOOGLE -->
-                <a href="https://docs.google.com/spreadsheets/d/1Dk8AQJkmUm5RhwUfeZVPg1VGM8_3oD_SdPvhwXF9Mfs/edit?gid=0#gid=0" target="_blank" class="action-btn" title="Abrir en Google Sheets">
+                <a href="https://docs.google.com/spreadsheets/d/1Dk8AQJkmUm5RhwUfeZVPg1VGM8_3oD_SdPvhwXF9Mfs/edit?gid=0#gid=0" target="_blank" class="action-btn" title="Abrir Hoja de Cálculo original">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                         <polyline points="15 3 21 3 21 9"></polyline>
                         <line x1="10" y1="14" x2="21" y2="3"></line>
                     </svg>
                 </a>
-
-                <!-- BOTÓN RECARGAR -->
-                <button class="action-btn reload-btn" onclick="location.reload()" title="Recargar App">
+                <button class="action-btn" onclick="location.reload()" title="Recargar la aplicación">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="23 4 23 10 17 10"></polyline>
                         <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
                     </svg>
                 </button>
             </div>
-        </div>
-        
-        <!-- PANEL DE MÉTRICAS METRICO/RESUMEN -->
-        <div class="metrics-container">
-            <div class="metric-block">
-                <span class="metric-title">Total Registros</span>
-                <span id="metric-total" class="metric-value">...</span>
-            </div>
-            <div class="metric-divider"></div>
-            <div class="metric-block">
-                <span class="metric-title">Última Actualización</span> 
-                <span id="metric-fecha" class="metric-value">...</span>
-            </div>
-        </div>
+        </header>
 
-        <!-- BARRA DE BÚSQUEDA CON BOTÓN "X" -->
-        <div class="search-container">
-            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            <input type="text" id="searchInput" class="search-input" oninput="filtrarTabla()" placeholder="Buscar por paciente, documento, fecha o servicio...">
+        <!-- BARRA DE CONTROL INTEGRADA (BUSCADOR, MÉTRICAS Y ACTUALIZAR) -->
+        <div class="controls-card">
             
-            <svg class="clear-search" id="clearSearchBtn" onclick="limpiarBusqueda()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
+            <div class="search-container">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="searchInput" class="search-input" oninput="filtrarTabla()" placeholder="Buscar paciente, diagnóstico, receta, fecha...">
+                <svg class="clear-search" id="clearSearchBtn" onclick="limpiarBusqueda()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </div>
+
+            <div class="metrics-group">
+                <div class="metric-item">
+                    <span class="metric-title">Registros</span>
+                    <span id="metric-total" class="metric-value">...</span>
+                </div>
+                <div class="metric-divider"></div>
+                <div class="metric-item">
+                    <span class="metric-title">Sincronizado</span>
+                    <span id="metric-fecha" class="metric-value">...</span>
+                </div>
+            </div>
+
+            <button class="refresh-btn" onclick="cargarDatos()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                Actualizar
+            </button>
         </div>
 
-        <button class="refresh-btn" onclick="cargarDatos()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="17 8 12 3 7 8"></polyline>
-                <line x1="12" y1="3" x2="12" y2="15"></line>
-            </svg>
-            Actualizar Datos
-        </button>
-    </div>
+        <!-- CONTENEDOR DE LA TABLA -->
+        <div class="table-card">
+            <div class="table-responsive">
+                <table>
+                    <thead id="table-head"></thead>
+                    <tbody id="table-body">
+                        <tr><td colspan="10" class="loading">Cargando registros...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-    <div class="table-container">
-        <table>
-            <thead id="table-head">
-                <!-- Las cabeceras se cargarán dinámicamente -->
-            </thead>
-            <tbody id="table-body">
-                <tr><td colspan="10" class="loading">Cargando datos...</td></tr>
-            </tbody>
-        </table>
     </div>
 
     <script>
-        // CONFIGURACIÓN DE TU HOJA DE CÁLCULO
         const sheetId = '1Dk8AQJkmUm5RhwUfeZVPg1VGM8_3oD_SdPvhwXF9Mfs';
-        const gidTabla = '0'; // GID de la hoja principal (gid=0)
+        const gidTabla = '0';
 
         function limpiarBusqueda() {
             const input = document.getElementById('searchInput');
@@ -480,57 +449,38 @@
             const filas = tabla.getElementsByTagName('tr');
             const clearBtn = document.getElementById('clearSearchBtn');
 
-            if (filtro.length > 0) {
-                clearBtn.style.display = 'flex';
-            } else {
-                clearBtn.style.display = 'none';
-            }
+            clearBtn.style.display = filtro.length > 0 ? 'flex' : 'none';
 
             for (let i = 0; i < filas.length; i++) {
                 if (filas[i].querySelector('.loading')) continue;
-                
                 let textoFila = filas[i].textContent || filas[i].innerText;
-                
-                if (textoFila.toLowerCase().indexOf(filtro) > -1) {
-                    filas[i].style.display = "";
-                } else {
-                    filas[i].style.display = "none";
-                }
+                filas[i].style.display = textoFila.toLowerCase().indexOf(filtro) > -1 ? "" : "none";
             }
         }
 
         async function cargarDatos() {
             const tbody = document.getElementById('table-body');
             const thead = document.getElementById('table-head');
-            const inputBusqueda = document.getElementById('searchInput');
-            const clearBtn = document.getElementById('clearSearchBtn');
-            
             const totalEl = document.getElementById('metric-total');
             const fechaEl = document.getElementById('metric-fecha');
             
             tbody.innerHTML = '<tr><td colspan="10" class="loading">Sincronizando con Google Sheets...</td></tr>';
             totalEl.innerText = '...';
             fechaEl.innerText = '...';
-            
-            inputBusqueda.value = "";
-            clearBtn.style.display = 'none';
 
-            // Parámetro noCache para evitar datos obsoletos en caché
             const noCache = new Date().getTime();
             const urlTabla = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gidTabla}&_=${noCache}`;
 
             try {
                 const response = await fetch(urlTabla);
                 const text = await response.text();
-                
-                // Extraer el JSON del wrapper gviz
                 const jsonString = text.substring(text.indexOf('({') + 1, text.lastIndexOf('})') + 1);
                 const data = JSON.parse(jsonString);
 
                 thead.innerHTML = '';
                 tbody.innerHTML = '';
 
-                // Renderizar Cabeceras
+                // Headers
                 const headers = data.table.cols;
                 let trHead = document.createElement('tr');
                 headers.forEach(header => {
@@ -542,15 +492,13 @@
                 });
                 thead.appendChild(trHead);
 
-                // Invertir para mostrar los registros más recientes primero
+                // Filas invertidas (últimos registros primero)
                 const rows = data.table.rows.slice().reverse(); 
                 
-                // Actualizar métricas automáticas
                 totalEl.innerText = rows.length;
                 const ahora = new Date();
                 fechaEl.innerText = `${ahora.getHours().toString().padStart(2, '0')}:${ahora.getMinutes().toString().padStart(2, '0')}`;
 
-                // Renderizar Filas
                 rows.forEach(row => {
                     let tr = document.createElement('tr');
                     row.c.forEach((cell, index) => {
@@ -559,7 +507,6 @@
                             let headerLabel = headers[index].label || headers[index].id || '';
                             td.setAttribute('data-label', headerLabel); 
                             
-                            // Extraer texto o valor formateado
                             let valorCelda = '-';
                             if (cell) {
                                 if (cell.f) {
@@ -576,7 +523,7 @@
                 });
 
             } catch (error) {
-                tbody.innerHTML = '<tr><td colspan="10" class="loading" style="color:#d32f2f;">Error de conexión. Asegúrate de que la hoja de Google Sheets esté pública.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="10" class="loading" style="color:#e53e3e;">Error al consultar la hoja de datos. Verifica los permisos de Google Sheets.</td></tr>';
                 totalEl.innerText = 'Error';
                 fechaEl.innerText = 'Error';
             }
