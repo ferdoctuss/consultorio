@@ -1,260 +1,588 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Visor de Servicios y Agenda - Consultorio</title>
-  <style>
-    /* RESET & ESTILOS BASE */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Consultorio - Sistema de Datos</title>
+    
+    <!-- CONFIGURACIÓN PWA Y WEB MOBILE -->
+    <link rel="apple-touch-icon" href="icono.png">
+    <link rel="icon" href="icono.png" type="image/png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Consultorio">
 
-    body {
-      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
-      background-color: #f4f7f9;
-      color: #333;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
+    <style>
+        /* === VARIABLES DE COLOR Y ESTILOS DE CONSULTORIO === */
+        :root {
+            --primary-color: #0d3b66;
+            --primary-bg: #e8f1f5;
+            
+            --secondary-color: #00a896;
+            --secondary-bg: #e6f6f5;
+            
+            --active-color: var(--primary-color);
+            --active-bg: var(--primary-bg);
+            
+            --text-color: #2b2d42;
+            --page-bg: #f4f7f9;
+        }
 
-    /* ENCABEZADO / NAVBAR */
-    header {
-      background-color: #0d3b66;
-      color: #ffffff;
-      padding: 1rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--page-bg);
+            color: var(--text-color);
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: background-color 0.3s;
+        }
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+        .header {
+            width: 100%;
+            max-width: 1000px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+        
+        .title-bar {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #e1e8ed;
+            padding-bottom: 12px;
+        }
 
-    .brand-icon {
-      width: 36px;
-      height: 36px;
-      background-color: #00a896;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 1.2rem;
-      color: #fff;
-    }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-    .brand-title h1 {
-      font-size: 1.25rem;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-    }
+        .brand-avatar {
+            width: 36px;
+            height: 36px;
+            background-color: var(--secondary-color);
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    .brand-title p {
-      font-size: 0.8rem;
-      color: #a0c4e2;
-    }
+        h1 {
+            color: var(--primary-color);
+            margin: 0;
+            font-size: 1.3rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
 
-    .header-actions {
-      display: flex;
-      gap: 10px;
-    }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-    .btn {
-      background-color: #00a896;
-      color: white;
-      border: none;
-      padding: 0.55rem 1.1rem;
-      border-radius: 6px;
-      font-size: 0.88rem;
-      font-weight: 500;
-      cursor: pointer;
-      text-decoration: none;
-      transition: background-color 0.2s ease, transform 0.1s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
+        .action-btn {
+            background: white;
+            border: 1px solid #ddd;
+            color: #555;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
 
-    .btn:hover {
-      background-color: #028090;
-    }
+        .action-btn:hover, .action-btn:active {
+            background: #f0f0f0;
+            color: var(--active-color);
+            border-color: var(--active-color);
+        }
 
-    .btn-secondary {
-      background-color: transparent;
-      border: 1px solid #a0c4e2;
-      color: #ffffff;
-    }
+        .action-btn svg {
+            width: 20px;
+            height: 20px;
+        }
 
-    .btn-secondary:hover {
-      background-color: rgba(255, 255, 255, 0.1);
-    }
+        .action-btn.reload-btn:hover, .action-btn.reload-btn:active {
+            transform: rotate(90deg);
+        }
+        
+        /* === PANEL DE MÉTRICAS === */
+        .metrics-container {
+            background-color: var(--active-bg);
+            border: 2px solid var(--active-color);
+            padding: 15px 10px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 600px;
+            gap: 5px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+            transition: all 0.3s;
+        }
 
-    /* CONTENEDOR PRINCIPAL */
-    main {
-      flex: 1;
-      padding: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      max-width: 1400px;
-      width: 100%;
-      margin: 0 auto;
-    }
+        .metric-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            flex: 1;
+        }
 
-    .card {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-      border: 1px solid #e1e8ed;
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      overflow: hidden;
-    }
+        .metric-divider {
+            width: 2px;
+            height: 40px;
+            background-color: var(--active-color);
+            opacity: 0.3;
+            transition: background-color 0.3s;
+        }
 
-    .card-header {
-      padding: 1rem 1.5rem;
-      background-color: #ffffff;
-      border-bottom: 1px solid #e1e8ed;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+        .metric-title {
+            font-weight: 800;
+            color: var(--active-color);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            transition: color 0.3s;
+        }
 
-    .card-header h2 {
-      font-size: 1rem;
-      color: #0d3b66;
-      font-weight: 600;
-    }
+        .metric-value {
+            font-weight: 900;
+            font-size: 1.3rem;
+            color: #111;
+        }
 
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.8rem;
-      color: #2e7d32;
-      background-color: #e8f5e9;
-      padding: 4px 10px;
-      border-radius: 20px;
-    }
+        /* === BARRA DE BÚSQUEDA === */
+        .search-container {
+            width: 100%;
+            position: relative;
+            margin-top: 5px;
+            transition: all 0.3s;
+        }
 
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      background-color: #2e7d32;
-      border-radius: 50%;
-    }
+        .search-input {
+            width: 100%;
+            padding: 14px 45px 14px 45px; 
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            box-sizing: border-box;
+            outline: none;
+            transition: all 0.3s;
+            color: #333;
+            background-color: white;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+        }
 
-    /* IFRAME / CONTENEDOR DEL EXCEL */
-    .spreadsheet-container {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      min-height: 600px;
-      flex: 1;
-      background-color: #f8f9fa;
-    }
+        .search-input:focus {
+            border-color: var(--active-color);
+            box-shadow: 0 0 0 4px var(--active-bg);
+        }
 
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            color: #999;
+            transition: color 0.3s;
+            pointer-events: none;
+        }
 
-    /* FOOTER */
-    footer {
-      text-align: center;
-      padding: 1rem;
-      font-size: 0.85rem;
-      color: #6c757d;
-      background-color: #ffffff;
-      border-top: 1px solid #e1e8ed;
-    }
+        .search-container:focus-within .search-icon {
+            color: var(--active-color);
+        }
+        
+        .clear-search {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            color: #999;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.3s;
+        }
 
-    /* RESPONSIVO */
-    @media (max-width: 768px) {
-      header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
-      }
-      .header-actions {
-        width: 100%;
-        justify-content: space-between;
-      }
-      main {
-        padding: 0.75rem;
-      }
-    }
-  </style>
+        .clear-search:hover {
+            color: var(--active-color);
+        }
+
+        /* === BOTÓN ACTUALIZAR DATOS === */
+        .refresh-btn {
+            background-color: var(--active-color); 
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            width: 100%;
+            max-width: 1000px;
+            transition: background-color 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .refresh-btn:hover {
+            filter: brightness(0.9);
+        }
+        
+        /* === ESTILOS DE TABLA === */
+        .table-container {
+            width: 100%;
+            max-width: 1000px;
+            background: transparent; 
+            overflow: visible;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: var(--active-bg);
+            color: var(--active-color);
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .loading {
+            padding: 20px;
+            text-align: center;
+            font-weight: bold;
+            color: var(--active-color);
+            background: white;
+            border-radius: 8px;
+        }
+
+        /* === VISTA MÓVIL RESPONSIVA (CARDS) === */
+        @media (max-width: 768px) {
+            h1 { font-size: 1.1rem; }
+            
+            .metrics-container {
+                padding: 12px 5px;
+                gap: 5px;
+            }
+            .metric-title { font-size: 0.65rem; }
+            .metric-value { font-size: 1.1rem; }
+            .metric-divider { height: 35px; }
+            
+            .search-input {
+                font-size: 0.95rem;
+                padding: 12px 42px 12px 42px; 
+            }
+
+            .refresh-btn {
+                font-size: 0.95rem;
+                padding: 12px;
+            }
+            
+            table {
+                background: transparent;
+                box-shadow: none;
+            }
+
+            table, thead, tbody, th, td, tr {
+                display: block;
+                width: 100%;
+            }
+
+            thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+            
+            tr {
+                margin-bottom: 15px; 
+                border: 1px solid #cfd8dc; 
+                border-top: 5px solid var(--active-color); 
+                border-radius: 12px; 
+                box-shadow: 0 4px 8px rgba(0,0,0,0.08); 
+                background-color: #ffffff;
+                overflow: hidden;
+                transition: border-color 0.3s;
+            }
+            
+            td {
+                border: none;
+                border-bottom: 1px solid #f0f0f0; 
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 8px 12px; 
+                text-align: right;
+                box-sizing: border-box;
+                word-wrap: break-word;
+                font-size: 0.9rem; 
+                color: #333; 
+            }
+
+            td:last-child {
+                border-bottom: 0;
+            }
+
+            td::before {
+                content: attr(data-label);
+                font-weight: 800; 
+                color: var(--active-color);
+                text-align: left;
+                padding-right: 10px;
+                flex-shrink: 0;
+                max-width: 45%;
+                font-size: 0.75rem; 
+                text-transform: uppercase; 
+                transition: color 0.3s;
+            }
+        }
+    </style>
 </head>
 <body>
 
-  <!-- ENCABEZADO -->
-  <header>
-    <div class="brand">
-      <div class="brand-icon">C</div>
-      <div class="brand-title">
-        <h1>Consultorio Profesional</h1>
-        <p>Sistema de Consulta e Información</p>
-      </div>
-    </div>
-    <div class="header-actions">
-      <button class="btn btn-secondary" onclick="reloadFrame()">Actualizar</button>
-      <a href="https://docs.google.com/spreadsheets/d/1Dk8AQJkmUm5RhwUfeZVPg1VGM8_3oD_SdPvhwXF9Mfs/edit?gid=0#gid=0" target="_blank" class="btn">Abrir en Google Sheets ↗</a>
-    </div>
-  </header>
+    <div class="header">
+        <div class="title-bar">
+            <div class="brand">
+                <div class="brand-avatar">C</div>
+                <h1>Consultorio</h1>
+            </div>
+            
+            <div class="header-actions">
+                <!-- BOTÓN ABRIR HOJA DE GOOGLE -->
+                <a href="https://docs.google.com/spreadsheets/d/1Dk8AQJkmUm5RhwUfeZVPg1VGM8_3oD_SdPvhwXF9Mfs/edit?gid=0#gid=0" target="_blank" class="action-btn" title="Abrir en Google Sheets">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                    </svg>
+                </a>
 
-  <!-- CONTENIDO PRINCIPAL -->
-  <main>
-    <div class="card">
-      <div class="card-header">
-        <h2>Panel de Información</h2>
-        <div class="status-badge">
-          <span class="status-dot"></span>
-          Conectado en vivo
+                <!-- BOTÓN RECARGAR -->
+                <button class="action-btn reload-btn" onclick="location.reload()" title="Recargar App">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="23 4 23 10 17 10"></polyline>
+                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                    </svg>
+                </button>
+            </div>
         </div>
-      </div>
-      <div class="spreadsheet-container">
-        <!-- Google Sheets embebido en modo previa/publicado -->
-        <iframe 
-          id="sheetFrame"
-          src="https://docs.google.com/spreadsheets/d/1Dk8AQJkmUm5RhwUfeZVPg1VGM8_3oD_SdPvhwXF9Mfs/preview?gid=0" 
-          allowfullscreen>
-        </iframe>
-      </div>
+        
+        <!-- PANEL DE MÉTRICAS METRICO/RESUMEN -->
+        <div class="metrics-container">
+            <div class="metric-block">
+                <span class="metric-title">Total Registros</span>
+                <span id="metric-total" class="metric-value">...</span>
+            </div>
+            <div class="metric-divider"></div>
+            <div class="metric-block">
+                <span class="metric-title">Última Actualización</span> 
+                <span id="metric-fecha" class="metric-value">...</span>
+            </div>
+        </div>
+
+        <!-- BARRA DE BÚSQUEDA CON BOTÓN "X" -->
+        <div class="search-container">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="searchInput" class="search-input" oninput="filtrarTabla()" placeholder="Buscar por paciente, documento, fecha o servicio...">
+            
+            <svg class="clear-search" id="clearSearchBtn" onclick="limpiarBusqueda()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </div>
+
+        <button class="refresh-btn" onclick="cargarDatos()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            Actualizar Datos
+        </button>
     </div>
-  </main>
 
-  <!-- PIE DE PÁGINA -->
-  <footer>
-    &copy; <span id="year"></span> Consultorio. Todos los derechos reservados.
-  </footer>
+    <div class="table-container">
+        <table>
+            <thead id="table-head">
+                <!-- Las cabeceras se cargarán dinámicamente -->
+            </thead>
+            <tbody id="table-body">
+                <tr><td colspan="10" class="loading">Cargando datos...</td></tr>
+            </tbody>
+        </table>
+    </div>
 
-  <!-- JAVASCRIPT -->
-  <script>
-    // Configurar año automático en el footer
-    document.getElementById('year').textContent = new Date().getFullYear();
+    <script>
+        // CONFIGURACIÓN DE TU HOJA DE CÁLCULO
+        const sheetId = '1Dk8AQJkmUm5RhwUfeZVPg1VGM8_3oD_SdPvhwXF9Mfs';
+        const gidTabla = '0'; // GID de la hoja principal (gid=0)
 
-    // Función para recargar el iframe sin refrescar toda la página
-    function reloadFrame() {
-      const iframe = document.getElementById('sheetFrame');
-      const currentSrc = iframe.src;
-      iframe.src = '';
-      setTimeout(() => {
-        iframe.src = currentSrc;
-      }, 100);
-    }
-  </script>
+        function limpiarBusqueda() {
+            const input = document.getElementById('searchInput');
+            input.value = '';
+            filtrarTabla();
+            input.focus();
+        }
+
+        function filtrarTabla() {
+            const input = document.getElementById('searchInput');
+            const filtro = input.value.toLowerCase();
+            const tabla = document.getElementById('table-body');
+            const filas = tabla.getElementsByTagName('tr');
+            const clearBtn = document.getElementById('clearSearchBtn');
+
+            if (filtro.length > 0) {
+                clearBtn.style.display = 'flex';
+            } else {
+                clearBtn.style.display = 'none';
+            }
+
+            for (let i = 0; i < filas.length; i++) {
+                if (filas[i].querySelector('.loading')) continue;
+                
+                let textoFila = filas[i].textContent || filas[i].innerText;
+                
+                if (textoFila.toLowerCase().indexOf(filtro) > -1) {
+                    filas[i].style.display = "";
+                } else {
+                    filas[i].style.display = "none";
+                }
+            }
+        }
+
+        async function cargarDatos() {
+            const tbody = document.getElementById('table-body');
+            const thead = document.getElementById('table-head');
+            const inputBusqueda = document.getElementById('searchInput');
+            const clearBtn = document.getElementById('clearSearchBtn');
+            
+            const totalEl = document.getElementById('metric-total');
+            const fechaEl = document.getElementById('metric-fecha');
+            
+            tbody.innerHTML = '<tr><td colspan="10" class="loading">Sincronizando con Google Sheets...</td></tr>';
+            totalEl.innerText = '...';
+            fechaEl.innerText = '...';
+            
+            inputBusqueda.value = "";
+            clearBtn.style.display = 'none';
+
+            // Parámetro noCache para evitar datos obsoletos en caché
+            const noCache = new Date().getTime();
+            const urlTabla = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gidTabla}&_=${noCache}`;
+
+            try {
+                const response = await fetch(urlTabla);
+                const text = await response.text();
+                
+                // Extraer el JSON del wrapper gviz
+                const jsonString = text.substring(text.indexOf('({') + 1, text.lastIndexOf('})') + 1);
+                const data = JSON.parse(jsonString);
+
+                thead.innerHTML = '';
+                tbody.innerHTML = '';
+
+                // Renderizar Cabeceras
+                const headers = data.table.cols;
+                let trHead = document.createElement('tr');
+                headers.forEach(header => {
+                    if (header && (header.label || header.id)) {
+                        let th = document.createElement('th');
+                        th.innerText = header.label || header.id;
+                        trHead.appendChild(th);
+                    }
+                });
+                thead.appendChild(trHead);
+
+                // Invertir para mostrar los registros más recientes primero
+                const rows = data.table.rows.slice().reverse(); 
+                
+                // Actualizar métricas automáticas
+                totalEl.innerText = rows.length;
+                const ahora = new Date();
+                fechaEl.innerText = `${ahora.getHours().toString().padStart(2, '0')}:${ahora.getMinutes().toString().padStart(2, '0')}`;
+
+                // Renderizar Filas
+                rows.forEach(row => {
+                    let tr = document.createElement('tr');
+                    row.c.forEach((cell, index) => {
+                        if (index < headers.length) {
+                            let td = document.createElement('td');
+                            let headerLabel = headers[index].label || headers[index].id || '';
+                            td.setAttribute('data-label', headerLabel); 
+                            
+                            // Extraer texto o valor formateado
+                            let valorCelda = '-';
+                            if (cell) {
+                                if (cell.f) {
+                                    valorCelda = cell.f;
+                                } else if (cell.v !== null && cell.v !== undefined) {
+                                    valorCelda = cell.v;
+                                }
+                            }
+                            td.innerText = valorCelda;
+                            tr.appendChild(td);
+                        }
+                    });
+                    tbody.appendChild(tr);
+                });
+
+            } catch (error) {
+                tbody.innerHTML = '<tr><td colspan="10" class="loading" style="color:#d32f2f;">Error de conexión. Asegúrate de que la hoja de Google Sheets esté pública.</td></tr>';
+                totalEl.innerText = 'Error';
+                fechaEl.innerText = 'Error';
+            }
+        }
+
+        window.onload = cargarDatos;
+    </script>
 </body>
 </html>
