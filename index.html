@@ -192,15 +192,21 @@
             border-color: var(--primary-color);
         }
 
-        /* === BARRA DE BÚSQUEDA === */
-        .search-container {
+        /* === CONTROLES DE BÚSQUEDA E IMPRESIÓN === */
+        .controls-row {
             width: 100%;
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-container {
+            flex: 1;
             position: relative;
         }
 
         .search-input {
             width: 100%;
-            padding: 14px 45px 14px 45px;
+            padding: 12px 45px 12px 45px;
             border: 2px solid #ddd;
             border-radius: 8px;
             font-size: 1rem;
@@ -239,7 +245,23 @@
         }
         .clear-search:hover { color: var(--primary-color); }
 
-        /* === BOTÓN ACTUALIZAR DATOS === */
+        .print-btn {
+            background-color: #2e7d32;
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: background 0.3s;
+        }
+        .print-btn:hover { background-color: #1b5e20; }
+
         .refresh-btn {
             background-color: var(--primary-color);
             color: white;
@@ -297,8 +319,22 @@
             border-radius: 8px;
         }
 
-        /* DISEÑO MÓVIL EN TARJETAS (ESTILO TU APP) */
+        /* ESTILOS ESPECIALES PARA CUANDO SE IMPRIME */
+        @media print {
+            body { background: white; padding: 0; }
+            #login-screen, .header-actions, .controls-row, .refresh-btn, .title-bar { display: none !important; }
+            #dashboard { display: block !important; width: 100%; max-width: 100%; }
+            .table-container { box-shadow: none; }
+            table { box-shadow: none; border: 1px solid #ccc; }
+            th { background-color: #f0f0f0 !important; color: black !important; -webkit-print-color-adjust: exact; }
+            tr { break-inside: avoid; }
+        }
+
+        /* DISEÑO MÓVIL EN TARJETAS */
         @media (max-width: 768px) {
+            .controls-row { flex-direction: column; }
+            .print-btn { padding: 12px; justify-content: center; }
+
             table, thead, tbody, th, td, tr {
                 display: block;
                 width: 100%;
@@ -391,18 +427,30 @@
                 </div>
             </div>
 
-            <!-- CONTENEDOR DE BÚSQUEDA Y ACTUALIZAR -->
+            <!-- CONTENEDOR DE BÚSQUEDA, IMPRESIÓN Y ACTUALIZAR -->
             <div id="search-and-refresh-area" style="width: 100%; display: flex; flex-direction: column; gap: 10px;">
-                <div class="search-container">
-                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                    <input type="text" id="searchInput" class="search-input" oninput="filtrarTabla()" placeholder="Buscar paciente, DNI, diagnóstico, médico...">
-                    <svg class="clear-search" id="clearSearchBtn" onclick="limpiarBusqueda()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
+                <div class="controls-row">
+                    <div class="search-container">
+                        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input type="text" id="searchInput" class="search-input" oninput="filtrarTabla()" placeholder="Buscar paciente, DNI, diagnóstico, médico...">
+                        <svg class="clear-search" id="clearSearchBtn" onclick="limpiarBusqueda()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </div>
+
+                    <!-- BOTÓN DE IMPRESIÓN INTELIGENTE -->
+                    <button class="print-btn" onclick="imprimirHistorialPaciente()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                            <rect x="6" y="14" width="12" height="8"></rect>
+                        </svg>
+                        Imprimir Filtrados
+                    </button>
                 </div>
 
                 <button class="refresh-btn" onclick="cargarDatosHistorial()">
@@ -427,10 +475,10 @@
         </div>
     </div>
 
-    <!-- SCRIPT DE LÓGICA, SEGURIDAD Y CONSUMO DE DATOS -->
+    <!-- SCRIPT DE LÓGICA, SEGURIDAD E IMPRESIÓN -->
     <script>
         const sheetId = '17OvVxayB1wjiB2z8RIGcc_S68F4AWstFZuLGWdctVNg';
-        const gidSheet = '0'; // Pestaña principal por defecto
+        const gidSheet = '0';
 
         const usuariosAutorizados = {
             "MEDICINA GENERAL": { "medico1": "1234", "drfernando": "5678" },
@@ -486,7 +534,6 @@
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('dashboard').style.display = 'flex';
 
-            // Si es Botica, dejamos en blanco como se pidió
             if (areaActual === "BOTICA") {
                 document.getElementById('search-and-refresh-area').style.display = 'none';
                 document.getElementById('table-body').innerHTML = `
@@ -535,6 +582,16 @@
             }
         }
 
+        // FUNCIÓN PARA IMPRIMIR SOLAMENTE LO QUE ESTÁ FILTRADO EN PANTALLA
+        function imprimirHistorialPaciente() {
+            const inputVal = document.getElementById('searchInput').value.trim();
+            if (inputVal === "") {
+                const confirmar = confirm("Estás a punto de imprimir todos los registros generales sin buscar un paciente específico. ¿Deseas continuar?");
+                if (!confirmar) return;
+            }
+            window.print();
+        }
+
         async function cargarDatosHistorial() {
             const tbody = document.getElementById('table-body');
             const thead = document.getElementById('table-head');
@@ -577,6 +634,7 @@
 
                 rows.forEach(row => {
                     let tr = document.createElement('tr');
+                    row.c.format = "plain";
                     row.c.forEach((cell, index) => {
                         if (index < headers.length && headers[index].label) {
                             let td = document.createElement('td');
