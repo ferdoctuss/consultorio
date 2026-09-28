@@ -2,33 +2,31 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>C.M.I. "Santa Celia" - Sistema Integrado</title>
 
     <style>
         :root {
             --primary-color: #0056b3;
             --primary-dark: #003d80;
-            --bg-color: #f4f6f9;
-            --sidebar-width: 240px;
-            --border-color: #e2e8f0;
+            --primary-bg: #e3f2fd;
             --text-color: #333333;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --page-bg: #f4f7f6;
         }
 
         body {
-            background-color: var(--bg-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--page-bg);
             color: var(--text-color);
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             min-height: 100vh;
         }
 
-        /* LOGIN */
+        /* === LOGIN SCREEN === */
         #login-screen {
             position: fixed;
             top: 0;
@@ -39,7 +37,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
+            z-index: 2000;
         }
 
         .login-card {
@@ -85,13 +83,15 @@
             border-radius: 6px;
             font-size: 0.95rem;
             outline: none;
+            box-sizing: border-box;
         }
 
         .form-control:focus {
             border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px var(--primary-bg);
         }
 
-        .btn-primary {
+        .btn-primary-login {
             width: 100%;
             background: var(--primary-color);
             color: white;
@@ -105,7 +105,7 @@
             margin-top: 10px;
         }
 
-        .btn-primary:hover {
+        .btn-primary-login:hover {
             background: var(--primary-dark);
         }
 
@@ -117,142 +117,238 @@
             font-weight: 600;
         }
 
-        /* DASHBOARD */
+        /* === DASHBOARD GENERAL === */
         #dashboard {
             display: none;
+            width: 100%;
+            max-width: 1100px;
             flex-direction: column;
-            min-height: 100vh;
+            align-items: center;
         }
 
-        header {
-            background: white;
-            border-bottom: 1px solid var(--border-color);
-            padding: 12px 24px;
+        .header {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+
+        .title-bar {
+            width: 100%;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            height: 60px;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
         }
 
-        .header-title {
+        .brand h1 {
+            color: #263238;
+            margin: 0;
+            font-size: 1.4rem;
             font-weight: 800;
-            font-size: 1.2rem;
+            text-transform: uppercase;
         }
 
-        .user-info {
+        .header-actions {
             display: flex;
             align-items: center;
-            gap: 12px;
-            font-size: 0.9rem;
+            gap: 10px;
         }
 
         .area-badge {
+            background-color: var(--primary-bg);
+            color: var(--primary-color);
             font-weight: 800;
             padding: 6px 14px;
             border-radius: 20px;
             font-size: 0.82rem;
             letter-spacing: 0.5px;
+            border: 1px solid var(--primary-color);
             text-transform: uppercase;
         }
 
-        .btn-logout {
-            background-color: #dc3545;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.82rem;
-        }
-
-        .main-wrapper {
-            display: flex;
-            flex: 1;
-        }
-
-        aside {
-            width: var(--sidebar-width);
+        .action-btn {
             background: white;
-            border-right: 1px solid var(--border-color);
-            padding: 20px 0;
-        }
-
-        .menu-item {
+            border: 1px solid #ddd;
+            color: #555;
+            padding: 8px 12px;
+            border-radius: 6px;
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 12px 20px;
-            color: #444;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.9rem;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.85rem;
             cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .action-btn:hover {
+            background: #f0f0f0;
+            color: var(--primary-color);
+            border-color: var(--primary-color);
         }
 
-        .menu-item.active {
+        /* === BARRA DE BÚSQUEDA === */
+        .search-container {
+            width: 100%;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 45px 14px 45px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            outline: none;
+            transition: all 0.3s;
+            background-color: white;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px var(--primary-bg);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            color: #999;
+            pointer-events: none;
+        }
+
+        .clear-search {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            color: #999;
+            cursor: pointer;
+            display: none;
+        }
+        .clear-search:hover { color: var(--primary-color); }
+
+        /* === BOTÓN ACTUALIZAR DATOS === */
+        .refresh-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            width: 100%;
+            transition: filter 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .refresh-btn:hover { filter: brightness(0.9); }
+
+        /* === TABLA Y DISEÑO RESPONSIVO === */
+        .table-container {
+            width: 100%;
+            background: transparent;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: var(--primary-bg);
+            color: var(--primary-color);
             font-weight: 700;
         }
 
-        main {
-            flex: 1;
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-        }
+        tr:hover { background-color: #f9f9f9; }
 
-        .card {
+        .loading {
+            padding: 30px;
+            text-align: center;
+            font-weight: bold;
+            color: var(--primary-color);
             background: white;
             border-radius: 8px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-            border: 1px solid var(--border-color);
-            overflow: hidden;
-            min-height: 600px;
         }
 
-        .card-header-title {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border-color);
-            background: #fafafa;
-        }
-
-        .card-header-title h3 {
-            font-size: 1.1rem;
-            font-weight: 800;
-        }
-
-        /* CONTENEDOR DEL VISOR DE GOOGLE SHEETS */
-        .viewer-container {
-            position: relative;
-            flex: 1;
-            width: 100%;
-            height: 100%;
-            min-height: 600px;
-        }
-
-        .viewer-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
+        /* DISEÑO MÓVIL EN TARJETAS (ESTILO TU APP) */
+        @media (max-width: 768px) {
+            table, thead, tbody, th, td, tr {
+                display: block;
+                width: 100%;
+            }
+            thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+            tr {
+                margin-bottom: 15px;
+                border: 1px solid #b0bec5;
+                border-top: 5px solid var(--primary-color);
+                border-radius: 10px;
+                box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+                background-color: #ffffff;
+                overflow: hidden;
+            }
+            td {
+                border: none;
+                border-bottom: 1px solid #f0f0f0;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px 12px;
+                text-align: right;
+                box-sizing: border-box;
+                font-size: 0.9rem;
+            }
+            td:last-child { border-bottom: 0; }
+            td::before {
+                content: attr(data-label);
+                font-weight: 800;
+                color: var(--primary-color);
+                text-align: left;
+                padding-right: 10px;
+                max-width: 45%;
+                font-size: 0.75rem;
+                text-transform: uppercase;
+            }
         }
     </style>
 </head>
 <body>
 
-    <!-- PANTALLA DE LOGIN -->
+    <!-- 1. PANTALLA DE LOGIN -->
     <div id="login-screen">
         <div class="login-card">
             <h2>C.M.I. "Santa Celia"</h2>
-            <p>Ingrese sus credenciales y seleccione el área</p>
+            <p>Sistema Integrado de Acceso</p>
             
             <form onsubmit="ejecutarLogin(event)">
                 <div class="form-group">
@@ -276,44 +372,66 @@
                     </select>
                 </div>
 
-                <button type="submit" class="btn-primary">Ingresar al Sistema</button>
-                <div id="error-box" class="error-msg">ID o PIN incorrectos. Verifique sus datos.</div>
+                <button type="submit" class="btn-primary-login">Ingresar al Sistema</button>
+                <div id="error-box" class="error-msg">ID, PIN o área incorrectos. Verifique sus datos.</div>
             </form>
         </div>
     </div>
 
-    <!-- DASHBOARD -->
+    <!-- 2. DASHBOARD / VISOR MODERNO -->
     <div id="dashboard">
-        <header id="app-header">
-            <div id="header-title" class="header-title">Centro Médico Integral "Santa Celia"</div>
-            <div class="user-info">
-                <span id="area-badge" class="area-badge">ÁREA</span>
-                <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
-            </div>
-        </header>
-
-        <div class="main-wrapper">
-            <aside>
-                <div id="menu-historial" class="menu-item active">📁 Historial Clínico</div>
-            </aside>
-
-            <main>
-                <div class="card">
-                    <div class="card-header-title">
-                        <h3 id="panel-title">Historial Clínico</h3>
-                        <span id="form-area-badge" class="area-badge">ÁREA</span>
-                    </div>
-
-                    <div id="panel-content" style="flex:1; display:flex; flex-direction:column;">
-                        <!-- Contenido dinámico según el área -->
-                    </div>
+        <div class="header">
+            <div class="title-bar">
+                <div class="brand">
+                    <h1 id="app-title-text">Historial Clínico</h1>
                 </div>
-            </main>
+                <div class="header-actions">
+                    <span id="header-badge" class="area-badge">ÁREA</span>
+                    <button class="action-btn" onclick="cerrarSesion()">Cerrar Sesión</button>
+                </div>
+            </div>
+
+            <!-- CONTENEDOR DE BÚSQUEDA Y ACTUALIZAR -->
+            <div id="search-and-refresh-area" style="width: 100%; display: flex; flex-direction: column; gap: 10px;">
+                <div class="search-container">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="searchInput" class="search-input" oninput="filtrarTabla()" placeholder="Buscar paciente, DNI, diagnóstico, médico...">
+                    <svg class="clear-search" id="clearSearchBtn" onclick="limpiarBusqueda()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </div>
+
+                <button class="refresh-btn" onclick="cargarDatosHistorial()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    Actualizar Registros
+                </button>
+            </div>
+        </div>
+
+        <!-- TABLA DINÁMICA -->
+        <div class="table-container">
+            <table>
+                <thead id="table-head"></thead>
+                <tbody id="table-body">
+                    <tr><td colspan="10" class="loading">Cargando registros...</td></tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <!-- SCRIPT DE VALIDACIÓN ESTRICTA Y VISOR -->
+    <!-- SCRIPT DE LÓGICA, SEGURIDAD Y CONSUMO DE DATOS -->
     <script>
+        const sheetId = '17OvVxayB1wjiB2z8RIGcc_S68F4AWstFZuLGWdctVNg';
+        const gidSheet = '0'; // Pestaña principal por defecto
+
         const usuariosAutorizados = {
             "MEDICINA GENERAL": { "medico1": "1234", "drfernando": "5678" },
             "ODONTOLOGIA":      { "dentista1": "1111", "odonto": "2222" },
@@ -322,15 +440,13 @@
         };
 
         const temasArea = {
-            "MEDICINA GENERAL": { primary: "#0056b3", dark: "#003d80", lightBg: "#e3f2fd", badgeColor: "#0d47a1" },
-            "ODONTOLOGIA":      { primary: "#00897b", dark: "#004d40", lightBg: "#e0f2f1", badgeColor: "#004d40" },
-            "LABORATORIO":      { primary: "#7b1fa2", dark: "#4a148c", lightBg: "#f3e5f5", badgeColor: "#4a148c" },
-            "BOTICA":           { primary: "#e65100", dark: "#bf360c", lightBg: "#fbe9e7", badgeColor: "#bf360c" }
+            "MEDICINA GENERAL": { primary: "#0056b3", dark: "#003d80", bg: "#e3f2fd" },
+            "ODONTOLOGIA":      { primary: "#00897b", dark: "#004d40", bg: "#e0f2f1" },
+            "LABORATORIO":      { primary: "#7b1fa2", dark: "#4a148c", bg: "#f3e5f5" },
+            "BOTICA":           { primary: "#e65100", dark: "#bf360c", bg: "#fbe9e7" }
         };
 
-        // ENLACE DE TU GOOGLE SHEETS ADAPTADO PARA VISOR
-        // (Se transforma /edit?usp=... por /preview para que luzca limpio como visor)
-        const sheetViewerURL = "https://docs.google.com/spreadsheets/d/17OvVxayB1wjiB2z8RIGcc_S68F4AWstFZuLGWdctVNg/preview";
+        let areaActual = "";
 
         function ejecutarLogin(event) {
             event.preventDefault();
@@ -339,81 +455,141 @@
             const selectArea = document.getElementById('login-area');
             const errorBox = document.getElementById('error-box');
 
-            let areaSeleccionada = selectArea.value;
+            areaActual = selectArea.value;
             let accesoConcedido = false;
             let esSuperUser = false;
 
             if (idInput === "USER" && pinInput === "171819") {
-                if (!areaSeleccionada) {
-                    errorBox.textContent = "Por favor, seleccione un área para ingresar.";
+                if (!areaActual) {
+                    errorBox.textContent = "Por favor, seleccione un área.";
                     errorBox.style.display = "block";
                     return;
                 }
                 accesoConcedido = true;
                 esSuperUser = true;
-            } else if (areaSeleccionada && usuariosAutorizados[areaSeleccionada]) {
-                const credencialesArea = usuariosAutorizados[areaSeleccionada];
-                if (credencialesArea[idInput] && credencialesArea[idInput] === pinInput) {
+            } else if (areaActual && usuariosAutorizados[areaActual]) {
+                const credenciales = usuariosAutorizados[areaActual];
+                if (credenciales[idInput] && credenciales[idInput] === pinInput) {
                     accesoConcedido = true;
                 }
             }
 
             if (!accesoConcedido) {
-                errorBox.textContent = "ID, PIN o área seleccionada incorrectos. Verifique sus datos.";
+                errorBox.textContent = "ID o PIN incorrectos para el área seleccionada.";
                 errorBox.style.display = "block";
                 return;
             }
 
             errorBox.style.display = "none";
-            aplicarTemaYContenido(areaSeleccionada, esSuperUser);
+            aplicarTema(areaActual, esSuperUser);
 
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('dashboard').style.display = 'flex';
-        }
 
-        function aplicarTemaYContenido(area, esSuperUser) {
-            const tema = temasArea[area] || temasArea["MEDICINA GENERAL"];
-            
-            document.documentElement.style.setProperty('--primary-color', tema.primary);
-            document.documentElement.style.setProperty('--primary-dark', tema.dark);
-
-            const nombreAreaTexto = esSuperUser ? `${area} (SÚPER USUARIO)` : area;
-            
-            document.getElementById('header-title').style.color = tema.primary;
-            document.getElementById('area-badge').textContent = nombreAreaTexto;
-            document.getElementById('area-badge').style.backgroundColor = tema.lightBg;
-            document.getElementById('area-badge').style.color = tema.badgeColor;
-
-            document.getElementById('form-area-badge').textContent = area;
-            document.getElementById('form-area-badge').style.backgroundColor = tema.lightBg;
-            document.getElementById('form-area-badge').style.color = tema.badgeColor;
-
-            const menuItem = document.getElementById('menu-historial');
-            menuItem.style.backgroundColor = tema.lightBg;
-            menuItem.style.color = tema.primary;
-            menuItem.style.borderLeft = `4px solid ${tema.primary}`;
-
-            const panelContent = document.getElementById('panel-content');
-            const panelTitle = document.getElementById('panel-title');
-
-            if (area === "BOTICA") {
-                panelTitle.textContent = "Botica - Módulo en Desarrollo";
-                panelContent.innerHTML = `
-                    <div style="text-align: center; color: #888; padding: 50px;">
+            // Si es Botica, dejamos en blanco como se pidió
+            if (areaActual === "BOTICA") {
+                document.getElementById('search-and-refresh-area').style.display = 'none';
+                document.getElementById('table-body').innerHTML = `
+                    <tr><td colspan="10" class="loading" style="background: white; color: #666; padding: 40px;">
                         <h3>Módulo de Botica en blanco</h3>
                         <p>Este espacio se configurará próximamente.</p>
-                    </div>
-                `;
-                menuItem.style.display = 'none';
+                    </td></tr>`;
+                document.getElementById('table-head').innerHTML = '';
             } else {
-                panelTitle.textContent = "Historial Clínico - " + area;
-                // Se incrusta tu Google Sheets de forma limpia en el visor
-                panelContent.innerHTML = `
-                    <div class="viewer-container">
-                        <iframe src="${sheetViewerURL}" allowfullscreen></iframe>
-                    </div>
-                `;
-                menuItem.style.display = 'flex';
+                document.getElementById('search-and-refresh-area').style.display = 'flex';
+                cargarDatosHistorial();
+            }
+        }
+
+        function aplicarTema(area, esSuperUser) {
+            const tema = temasArea[area] || temasArea["MEDICINA GENERAL"];
+            const root = document.documentElement;
+
+            root.style.setProperty('--primary-color', tema.primary);
+            root.style.setProperty('--primary-dark', tema.dark);
+            root.style.setProperty('--primary-bg', tema.bg);
+
+            const textoBadge = esSuperUser ? `${area} (SÚPER)` : area;
+            document.getElementById('header-badge').textContent = textoBadge;
+            document.getElementById('app-title-text').textContent = `Historial Clínico - ${area}`;
+        }
+
+        function limpiarBusqueda() {
+            const input = document.getElementById('searchInput');
+            input.value = '';
+            filtrarTabla();
+            input.focus();
+        }
+
+        function filtrarTabla() {
+            const filtro = document.getElementById('searchInput').value.toLowerCase();
+            const filas = document.getElementById('table-body').getElementsByTagName('tr');
+            const clearBtn = document.getElementById('clearSearchBtn');
+
+            clearBtn.style.display = filtro.length > 0 ? 'block' : 'none';
+
+            for (let i = 0; i < filas.length; i++) {
+                if (filas[i].querySelector('.loading')) continue;
+                let textoFila = filas[i].textContent || filas[i].innerText;
+                filas[i].style.display = textoFila.toLowerCase().indexOf(filtro) > -1 ? "" : "none";
+            }
+        }
+
+        async function cargarDatosHistorial() {
+            const tbody = document.getElementById('table-body');
+            const thead = document.getElementById('table-head');
+            const inputBusqueda = document.getElementById('searchInput');
+            const clearBtn = document.getElementById('clearSearchBtn');
+
+            tbody.innerHTML = '<tr><td colspan="10" class="loading">Sincronizando con Google Sheets...</td></tr>';
+            inputBusqueda.value = "";
+            clearBtn.style.display = 'none';
+
+            const noCache = new Date().getTime();
+            const urlTabla = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gidSheet}&_=${noCache}`;
+
+            try {
+                const response = await fetch(urlTabla);
+                const text = await response.text();
+                const jsonString = text.substring(text.indexOf('({') + 1, text.lastIndexOf('})') + 1);
+                const data = JSON.parse(jsonString);
+
+                thead.innerHTML = '';
+                tbody.innerHTML = '';
+
+                const headers = data.table.cols;
+                let trHead = document.createElement('tr');
+                headers.forEach(header => {
+                    if (header.label) {
+                        let th = document.createElement('th');
+                        th.innerText = header.label;
+                        trHead.appendChild(th);
+                    }
+                });
+                thead.appendChild(trHead);
+
+                const rows = data.table.rows.reverse();
+
+                if (rows.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="10" class="loading">No hay registros en la hoja todavía.</td></tr>';
+                    return;
+                }
+
+                rows.forEach(row => {
+                    let tr = document.createElement('tr');
+                    row.c.forEach((cell, index) => {
+                        if (index < headers.length && headers[index].label) {
+                            let td = document.createElement('td');
+                            td.setAttribute('data-label', headers[index].label);
+                            td.innerText = (cell && cell.f) ? cell.f : (cell && cell.v ? cell.v : '-');
+                            tr.appendChild(td);
+                        }
+                    });
+                    tbody.appendChild(tr);
+                });
+
+            } catch (error) {
+                tbody.innerHTML = '<tr><td colspan="10" class="loading" style="color:red;">Error de conexión con la hoja. Verifique internet.</td></tr>';
             }
         }
 
@@ -423,6 +599,7 @@
             document.getElementById('login-id').value = '';
             document.getElementById('login-pin').value = '';
             document.getElementById('login-area').selectedIndex = 0;
+            areaActual = "";
         }
     </script>
 </body>
