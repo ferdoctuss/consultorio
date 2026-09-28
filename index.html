@@ -244,7 +244,7 @@
             <form onsubmit="ejecutarLogin(event)">
                 <div class="form-group">
                     <label>ID de Usuario:</label>
-                    <input type="text" id="login-id" class="form-control" placeholder="Ej. USER o ID de empleado" required>
+                    <input type="text" id="login-id" class="form-control" placeholder="Ej. USER o ID" required>
                 </div>
                 
                 <div class="form-group">
@@ -299,34 +299,21 @@
         </div>
     </div>
 
-    <!-- SCRIPT DE CONTROL Y TEMAS -->
+    <!-- SCRIPT DE VALIDACIÓN ESTRICTA Y TEMAS -->
     <script>
-        // Configuración de colores por área
+        // Base de datos temporal de usuarios autorizados y sus PINs
+        const usuariosAutorizados = {
+            "MEDICINA GENERAL": { "medico1": "1234", "drfernando": "5678" },
+            "ODONTOLOGIA":      { "dentista1": "1111", "odonto": "2222" },
+            "LABORATORIO":      { "lab1": "3333" },
+            "BOTICA":           { "botica1": "4444" }
+        };
+
         const temasArea = {
-            "MEDICINA GENERAL": {
-                primary: "#0056b3",
-                dark: "#003d80",
-                lightBg: "#e3f2fd",
-                badgeColor: "#0d47a1"
-            },
-            "ODONTOLOGIA": {
-                primary: "#00897b",
-                dark: "#004d40",
-                lightBg: "#e0f2f1",
-                badgeColor: "#004d40"
-            },
-            "LABORATORIO": {
-                primary: "#7b1fa2",
-                dark: "#4a148c",
-                lightBg: "#f3e5f5",
-                badgeColor: "#4a148c"
-            },
-            "BOTICA": {
-                primary: "#e65100",
-                dark: "#bf360c",
-                lightBg: "#fbe9e7",
-                badgeColor: "#bf360c"
-            }
+            "MEDICINA GENERAL": { primary: "#0056b3", dark: "#003d80", lightBg: "#e3f2fd", badgeColor: "#0d47a1" },
+            "ODONTOLOGIA":      { primary: "#00897b", dark: "#004d40", lightBg: "#e0f2f1", badgeColor: "#004d40" },
+            "LABORATORIO":      { primary: "#7b1fa2", dark: "#4a148c", lightBg: "#f3e5f5", badgeColor: "#4a148c" },
+            "BOTICA":           { primary: "#e65100", dark: "#bf360c", lightBg: "#fbe9e7", badgeColor: "#bf360c" }
         };
 
         function ejecutarLogin(event) {
@@ -337,26 +324,36 @@
             const errorBox = document.getElementById('error-box');
 
             let areaSeleccionada = selectArea.value;
+            let accesoConcedido = false;
+            let esSuperUser = false;
 
-            // Validación de Súper Usuario
+            // 1. Validar si es el Súper Usuario
             if (idInput === "USER" && pinInput === "171819") {
                 if (!areaSeleccionada) {
-                    errorBox.textContent = "Por favor, seleccione un área para ingresar como Súper Usuario.";
+                    errorBox.textContent = "Por favor, seleccione un área para ingresar.";
                     errorBox.style.display = "block";
                     return;
                 }
-                // Acceso concedido a cualquier área seleccionada
-            } else {
-                // Validación genérica de ejemplo (puedes ajustar tus validaciones de ID/PIN reales aquí)
-                if (pinInput.length < 4) {
-                    errorBox.textContent = "ID o PIN incorrectos. Intente nuevamente.";
-                    errorBox.style.display = "block";
-                    return;
+                accesoConcedido = true;
+                esSuperUser = true;
+            } 
+            // 2. Validar usuarios normales según el área seleccionada
+            else if (areaSeleccionada && usuariosAutorizados[areaSeleccionada]) {
+                const credencialesArea = usuariosAutorizados[areaSeleccionada];
+                if (credencialesArea[idInput] && credencialesArea[idInput] === pinInput) {
+                    accesoConcedido = true;
                 }
             }
 
+            // Resultado de la validación
+            if (!accesoConcedido) {
+                errorBox.textContent = "ID, PIN o área seleccionada incorrectos. Verifique sus datos.";
+                errorBox.style.display = "block";
+                return;
+            }
+
             errorBox.style.display = "none";
-            aplicarTemaYContenido(areaSeleccionada, idInput === "USER");
+            aplicarTemaYContenido(areaSeleccionada, esSuperUser);
 
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('dashboard').style.display = 'flex';
@@ -365,11 +362,9 @@
         function aplicarTemaYContenido(area, esSuperUser) {
             const tema = temasArea[area] || temasArea["MEDICINA GENERAL"];
             
-            // Aplicar colores dinámicos
             document.documentElement.style.setProperty('--primary-color', tema.primary);
             document.documentElement.style.setProperty('--primary-dark', tema.dark);
 
-            // Textos e insignias
             const nombreAreaTexto = esSuperUser ? `${area} (SÚPER USUARIO)` : area;
             
             document.getElementById('header-title').style.color = tema.primary;
@@ -381,13 +376,11 @@
             document.getElementById('form-area-badge').style.backgroundColor = tema.lightBg;
             document.getElementById('form-area-badge').style.color = tema.badgeColor;
 
-            // Estilos del menú lateral activo
             const menuItem = document.getElementById('menu-historial');
             menuItem.style.backgroundColor = tema.lightBg;
             menuItem.style.color = tema.primary;
             menuItem.style.borderLeft = `4px solid ${tema.primary}`;
 
-            // Manejo específico para la Botica (dejada en blanco)
             const panelContent = document.getElementById('panel-content');
             const panelTitle = document.getElementById('panel-title');
 
@@ -399,14 +392,13 @@
                         <p>Este espacio se configurará próximamente.</p>
                     </div>
                 `;
-                menuItem.style.display = 'none'; // Ocultar pestaña si está en blanco
+                menuItem.style.display = 'none';
             } else {
                 panelTitle.textContent = "Historial Clínico - " + area;
                 panelContent.innerHTML = `
                     <div style="color: #444;">
                         <h4 style="margin-bottom: 15px; color: ${tema.primary};">Gestión de Registros Médicos</h4>
-                        <p>Bienvenido al sistema de ${area}. Aquí podrás visualizar los expedientes y antecedentes correspondientes.</p>
-                        <!-- Inserta aquí tu visor o contenido de AppSheet/Google Sheets -->
+                        <p>Bienvenido al sistema de ${area}. Aquí podrás visualizar los expedientes correspondientes.</p>
                     </div>
                 `;
                 menuItem.style.display = 'flex';
