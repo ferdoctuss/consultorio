@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>C.M.I. "Santa Celia" - Medicina General</title>
+    <title>C.M.I. "Santa Celia" - Sistema Integrado</title>
 
     <style>
         :root {
@@ -35,7 +35,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: #0081c9;
+            background: linear-gradient(135deg, #0081c9, #0056b3);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -46,7 +46,7 @@
             background: white;
             padding: 35px 30px;
             border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             width: 100%;
             max-width: 420px;
             text-align: center;
@@ -54,7 +54,7 @@
 
         .login-card h2 {
             color: var(--primary-color);
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             margin-bottom: 6px;
             font-weight: 800;
         }
@@ -109,6 +109,14 @@
             background: var(--primary-dark);
         }
 
+        .error-msg {
+            color: #dc3545;
+            font-size: 0.85rem;
+            margin-top: 12px;
+            display: none;
+            font-weight: 600;
+        }
+
         /* DASHBOARD */
         #dashboard {
             display: none;
@@ -127,7 +135,6 @@
         }
 
         .header-title {
-            color: var(--primary-color);
             font-weight: 800;
             font-size: 1.2rem;
         }
@@ -139,15 +146,12 @@
             font-size: 0.9rem;
         }
 
-        .specialty-badge {
-            background-color: #e3f2fd;
-            color: #0d47a1;
+        .area-badge {
             font-weight: 800;
             padding: 6px 14px;
             border-radius: 20px;
             font-size: 0.82rem;
             letter-spacing: 0.5px;
-            border: 1px solid #bbdefb;
             text-transform: uppercase;
         }
 
@@ -184,13 +188,10 @@
             font-weight: 600;
             font-size: 0.9rem;
             cursor: pointer;
-            transition: all 0.2s;
         }
 
-        .menu-item:hover, .menu-item.active {
-            background-color: #e8f0fe;
-            color: var(--primary-color);
-            border-left: 4px solid var(--primary-color);
+        .menu-item.active {
+            font-weight: 700;
         }
 
         main {
@@ -209,7 +210,7 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.04);
             border: 1px solid var(--border-color);
             overflow: hidden;
-            min-height: 600px;
+            min-height: 550px;
         }
 
         .card-header-title {
@@ -222,111 +223,202 @@
         }
 
         .card-header-title h3 {
-            color: var(--primary-color);
             font-size: 1.1rem;
             font-weight: 800;
         }
 
-        /* CONTENEDOR PARA EL VISOR (IFRAME DE APPSHEET U OTROS) */
-        .viewer-container {
-            position: relative;
+        .content-area {
+            padding: 30px;
             flex: 1;
-            width: 100%;
-            height: 100%;
-        }
-
-        .viewer-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
         }
     </style>
 </head>
 <body>
 
-    <!-- 1. LOGIN -->
+    <!-- PANTALLA DE LOGIN -->
     <div id="login-screen">
         <div class="login-card">
             <h2>C.M.I. "Santa Celia"</h2>
-            <p>Ingrese sus credenciales de trabajador</p>
+            <p>Ingrese sus credenciales y seleccione el área</p>
             
             <form onsubmit="ejecutarLogin(event)">
                 <div class="form-group">
-                    <label>Usuario o Correo:</label>
-                    <input type="text" id="login-user" class="form-control" placeholder="Ej. Dr. Juan" required>
+                    <label>ID de Usuario:</label>
+                    <input type="text" id="login-id" class="form-control" placeholder="Ej. USER o ID de empleado" required>
                 </div>
                 
                 <div class="form-group">
-                    <label>Contraseña:</label>
-                    <input type="password" class="form-control" placeholder="********" required>
+                    <label>PIN de Acceso:</label>
+                    <input type="password" id="login-pin" class="form-control" placeholder="********" required>
                 </div>
 
                 <div class="form-group">
-                    <label>Especialidad / Área:</label>
-                    <select id="login-area" class="form-control">
-                        <option value="Medicina General" selected>Medicina General</option>
-                        <option value="Odontología">Odontología</option>
-                        <option value="Pediatría">Pediatría</option>
-                        <option value="Ginecología">Ginecología</option>
+                    <label>Área o Servicio Obligatorio:</label>
+                    <select id="login-area" class="form-control" required>
+                        <option value="" disabled selected>-- Seleccione un área --</option>
+                        <option value="MEDICINA GENERAL">Medicina General</option>
+                        <option value="ODONTOLOGIA">Odontología</option>
+                        <option value="LABORATORIO">Laboratorio</option>
+                        <option value="BOTICA">Botica</option>
                     </select>
                 </div>
 
                 <button type="submit" class="btn-primary">Ingresar al Sistema</button>
+                <div id="error-box" class="error-msg">ID o PIN incorrectos. Verifique sus datos.</div>
             </form>
         </div>
     </div>
 
-    <!-- 2. DASHBOARD / VISOR -->
+    <!-- DASHBOARD -->
     <div id="dashboard">
-        <header>
-            <div class="header-title">Centro Médico Integral "Santa Celia"</div>
+        <header id="app-header">
+            <div id="header-title" class="header-title">Centro Médico Integral "Santa Celia"</div>
             <div class="user-info">
-                <span id="area-badge" class="specialty-badge">MEDICINA GENERAL</span>
+                <span id="area-badge" class="area-badge">ÁREA</span>
                 <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
             </div>
         </header>
 
         <div class="main-wrapper">
             <aside>
-                <div class="menu-item active">📊 Visor General</div>
-                <div class="menu-item">📁 Historial de Atenciones</div>
+                <div id="menu-historial" class="menu-item active">📁 Historial Clínico</div>
             </aside>
 
             <main>
                 <div class="card">
                     <div class="card-header-title">
-                        <h3>Panel de Visualización</h3>
-                        <span id="form-area-badge" class="specialty-badge">MEDICINA GENERAL</span>
+                        <h3 id="panel-title">Historial Clínico</h3>
+                        <span id="form-area-badge" class="area-badge">ÁREA</span>
                     </div>
 
-                    <!-- AQUÍ PUEDES INCRUSTAR TU VISTA DE APPSHEET O GOOGLE SHEETS -->
-                    <div class="viewer-container">
-                        <iframe src="PEGA_AQUI_EL_ENLACE_DE_INCRUSTACION_DE_APPSHEET" allowfullscreen></iframe>
+                    <div class="content-area" id="panel-content">
+                        <!-- Contenido dinámico según el área -->
                     </div>
                 </div>
             </main>
         </div>
     </div>
 
-    <!-- SCRIPT DE NAVEGACIÓN Y LOGIN -->
+    <!-- SCRIPT DE CONTROL Y TEMAS -->
     <script>
+        // Configuración de colores por área
+        const temasArea = {
+            "MEDICINA GENERAL": {
+                primary: "#0056b3",
+                dark: "#003d80",
+                lightBg: "#e3f2fd",
+                badgeColor: "#0d47a1"
+            },
+            "ODONTOLOGIA": {
+                primary: "#00897b",
+                dark: "#004d40",
+                lightBg: "#e0f2f1",
+                badgeColor: "#004d40"
+            },
+            "LABORATORIO": {
+                primary: "#7b1fa2",
+                dark: "#4a148c",
+                lightBg: "#f3e5f5",
+                badgeColor: "#4a148c"
+            },
+            "BOTICA": {
+                primary: "#e65100",
+                dark: "#bf360c",
+                lightBg: "#fbe9e7",
+                badgeColor: "#bf360c"
+            }
+        };
+
         function ejecutarLogin(event) {
             event.preventDefault();
-            const area = document.getElementById('login-area').value.toUpperCase();
+            const idInput = document.getElementById('login-id').value.trim();
+            const pinInput = document.getElementById('login-pin').value.trim();
+            const selectArea = document.getElementById('login-area');
+            const errorBox = document.getElementById('error-box');
 
-            document.getElementById('area-badge').textContent = area;
-            document.getElementById('form-area-badge').textContent = area;
+            let areaSeleccionada = selectArea.value;
+
+            // Validación de Súper Usuario
+            if (idInput === "USER" && pinInput === "171819") {
+                if (!areaSeleccionada) {
+                    errorBox.textContent = "Por favor, seleccione un área para ingresar como Súper Usuario.";
+                    errorBox.style.display = "block";
+                    return;
+                }
+                // Acceso concedido a cualquier área seleccionada
+            } else {
+                // Validación genérica de ejemplo (puedes ajustar tus validaciones de ID/PIN reales aquí)
+                if (pinInput.length < 4) {
+                    errorBox.textContent = "ID o PIN incorrectos. Intente nuevamente.";
+                    errorBox.style.display = "block";
+                    return;
+                }
+            }
+
+            errorBox.style.display = "none";
+            aplicarTemaYContenido(areaSeleccionada, idInput === "USER");
 
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('dashboard').style.display = 'flex';
         }
 
+        function aplicarTemaYContenido(area, esSuperUser) {
+            const tema = temasArea[area] || temasArea["MEDICINA GENERAL"];
+            
+            // Aplicar colores dinámicos
+            document.documentElement.style.setProperty('--primary-color', tema.primary);
+            document.documentElement.style.setProperty('--primary-dark', tema.dark);
+
+            // Textos e insignias
+            const nombreAreaTexto = esSuperUser ? `${area} (SÚPER USUARIO)` : area;
+            
+            document.getElementById('header-title').style.color = tema.primary;
+            document.getElementById('area-badge').textContent = nombreAreaTexto;
+            document.getElementById('area-badge').style.backgroundColor = tema.lightBg;
+            document.getElementById('area-badge').style.color = tema.badgeColor;
+
+            document.getElementById('form-area-badge').textContent = area;
+            document.getElementById('form-area-badge').style.backgroundColor = tema.lightBg;
+            document.getElementById('form-area-badge').style.color = tema.badgeColor;
+
+            // Estilos del menú lateral activo
+            const menuItem = document.getElementById('menu-historial');
+            menuItem.style.backgroundColor = tema.lightBg;
+            menuItem.style.color = tema.primary;
+            menuItem.style.borderLeft = `4px solid ${tema.primary}`;
+
+            // Manejo específico para la Botica (dejada en blanco)
+            const panelContent = document.getElementById('panel-content');
+            const panelTitle = document.getElementById('panel-title');
+
+            if (area === "BOTICA") {
+                panelTitle.textContent = "Botica - Módulo en Desarrollo";
+                panelContent.innerHTML = `
+                    <div style="text-align: center; color: #888; padding: 50px;">
+                        <h3>Módulo de Botica en blanco</h3>
+                        <p>Este espacio se configurará próximamente.</p>
+                    </div>
+                `;
+                menuItem.style.display = 'none'; // Ocultar pestaña si está en blanco
+            } else {
+                panelTitle.textContent = "Historial Clínico - " + area;
+                panelContent.innerHTML = `
+                    <div style="color: #444;">
+                        <h4 style="margin-bottom: 15px; color: ${tema.primary};">Gestión de Registros Médicos</h4>
+                        <p>Bienvenido al sistema de ${area}. Aquí podrás visualizar los expedientes y antecedentes correspondientes.</p>
+                        <!-- Inserta aquí tu visor o contenido de AppSheet/Google Sheets -->
+                    </div>
+                `;
+                menuItem.style.display = 'flex';
+            }
+        }
+
         function cerrarSesion() {
             document.getElementById('dashboard').style.display = 'none';
             document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('login-id').value = '';
+            document.getElementById('login-pin').value = '';
+            document.getElementById('login-area').selectedIndex = 0;
         }
     </script>
 </body>
