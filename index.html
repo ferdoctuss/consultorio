@@ -210,7 +210,7 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.04);
             border: 1px solid var(--border-color);
             overflow: hidden;
-            min-height: 550px;
+            min-height: 600px;
         }
 
         .card-header-title {
@@ -227,9 +227,22 @@
             font-weight: 800;
         }
 
-        .content-area {
-            padding: 30px;
+        /* CONTENEDOR DEL VISOR DE GOOGLE SHEETS */
+        .viewer-container {
+            position: relative;
             flex: 1;
+            width: 100%;
+            height: 100%;
+            min-height: 600px;
+        }
+
+        .viewer-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
         }
     </style>
 </head>
@@ -291,7 +304,7 @@
                         <span id="form-area-badge" class="area-badge">ÁREA</span>
                     </div>
 
-                    <div class="content-area" id="panel-content">
+                    <div id="panel-content" style="flex:1; display:flex; flex-direction:column;">
                         <!-- Contenido dinámico según el área -->
                     </div>
                 </div>
@@ -299,9 +312,8 @@
         </div>
     </div>
 
-    <!-- SCRIPT DE VALIDACIÓN ESTRICTA Y TEMAS -->
+    <!-- SCRIPT DE VALIDACIÓN ESTRICTA Y VISOR -->
     <script>
-        // Base de datos temporal de usuarios autorizados y sus PINs
         const usuariosAutorizados = {
             "MEDICINA GENERAL": { "medico1": "1234", "drfernando": "5678" },
             "ODONTOLOGIA":      { "dentista1": "1111", "odonto": "2222" },
@@ -316,6 +328,10 @@
             "BOTICA":           { primary: "#e65100", dark: "#bf360c", lightBg: "#fbe9e7", badgeColor: "#bf360c" }
         };
 
+        // ENLACE DE TU GOOGLE SHEETS ADAPTADO PARA VISOR
+        // (Se transforma /edit?usp=... por /preview para que luzca limpio como visor)
+        const sheetViewerURL = "https://docs.google.com/spreadsheets/d/17OvVxayB1wjiB2z8RIGcc_S68F4AWstFZuLGWdctVNg/preview";
+
         function ejecutarLogin(event) {
             event.preventDefault();
             const idInput = document.getElementById('login-id').value.trim();
@@ -327,7 +343,6 @@
             let accesoConcedido = false;
             let esSuperUser = false;
 
-            // 1. Validar si es el Súper Usuario
             if (idInput === "USER" && pinInput === "171819") {
                 if (!areaSeleccionada) {
                     errorBox.textContent = "Por favor, seleccione un área para ingresar.";
@@ -336,16 +351,13 @@
                 }
                 accesoConcedido = true;
                 esSuperUser = true;
-            } 
-            // 2. Validar usuarios normales según el área seleccionada
-            else if (areaSeleccionada && usuariosAutorizados[areaSeleccionada]) {
+            } else if (areaSeleccionada && usuariosAutorizados[areaSeleccionada]) {
                 const credencialesArea = usuariosAutorizados[areaSeleccionada];
                 if (credencialesArea[idInput] && credencialesArea[idInput] === pinInput) {
                     accesoConcedido = true;
                 }
             }
 
-            // Resultado de la validación
             if (!accesoConcedido) {
                 errorBox.textContent = "ID, PIN o área seleccionada incorrectos. Verifique sus datos.";
                 errorBox.style.display = "block";
@@ -395,10 +407,10 @@
                 menuItem.style.display = 'none';
             } else {
                 panelTitle.textContent = "Historial Clínico - " + area;
+                // Se incrusta tu Google Sheets de forma limpia en el visor
                 panelContent.innerHTML = `
-                    <div style="color: #444;">
-                        <h4 style="margin-bottom: 15px; color: ${tema.primary};">Gestión de Registros Médicos</h4>
-                        <p>Bienvenido al sistema de ${area}. Aquí podrás visualizar los expedientes correspondientes.</p>
+                    <div class="viewer-container">
+                        <iframe src="${sheetViewerURL}" allowfullscreen></iframe>
                     </div>
                 `;
                 menuItem.style.display = 'flex';
