@@ -381,7 +381,8 @@
 
     <!-- SCRIPT JAVASCRIPT INTEGRADO -->
     <script>
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbx9opki9itcB5WDEZBtu-ylzEZqDHqWa_Ejw3XyGu9z9MQ4s6-_Rp5b_qbuLuZ3JYcl/exec';
+        // URL DE TU APLICACIÓN WEB DE GOOGLE APPS SCRIPT
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbzFSwmEr2We2NmAmQGqm1bRYQhxJWLrlTAbH29BufEJ-VZwhc0EEGz-JnCJWvH_IvZT/exec';
 
         // Autocompletar la fecha actual al cargar
         const hoy = new Date();
@@ -419,7 +420,6 @@
             btnGuardar.innerText = 'Guardando en Google Sheets...';
             statusAlert.style.display = 'none';
 
-            // Capturar directamente todos los inputs con sus atributos 'name'
             const formData = new FormData(form);
 
             fetch(scriptURL, {
