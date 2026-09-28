@@ -9,7 +9,6 @@
         :root {
             --primary-color: #0056b3;
             --primary-dark: #003d80;
-            --secondary-color: #00a896;
             --bg-color: #f4f6f9;
             --sidebar-width: 240px;
             --border-color: #e2e8f0;
@@ -29,7 +28,7 @@
             min-height: 100vh;
         }
 
-        /* === PANTALLA DE LOGIN === */
+        /* LOGIN */
         #login-screen {
             position: fixed;
             top: 0;
@@ -104,20 +103,28 @@
             cursor: pointer;
             transition: background 0.2s;
             margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
         }
 
         .btn-primary:hover {
             background: var(--primary-dark);
         }
 
-        /* === DASHBOARD PRINCIPAL === */
+        .btn-primary:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        /* DASHBOARD */
         #dashboard {
-            display: none; /* Se activa tras login */
+            display: none;
             flex-direction: column;
             min-height: 100vh;
         }
 
-        /* BARRA SUPERIOR (HEADER) */
         header {
             background: white;
             border-bottom: 1px solid var(--border-color);
@@ -141,7 +148,6 @@
             font-size: 0.9rem;
         }
 
-        /* ETIQUETA VISIBLE Y DESTACADA DE LA ESPECIALIDAD */
         .specialty-badge {
             background-color: #e3f2fd;
             color: #0d47a1;
@@ -165,13 +171,11 @@
             font-size: 0.82rem;
         }
 
-        /* ESTRUCTURA DASHBOARD */
         .main-wrapper {
             display: flex;
             flex: 1;
         }
 
-        /* BARRA LATERAL (SIDEBAR) */
         aside {
             width: var(--sidebar-width);
             background: white;
@@ -198,7 +202,6 @@
             border-left: 4px solid var(--primary-color);
         }
 
-        /* CONTENIDO PRINCIPAL */
         main {
             flex: 1;
             padding: 24px;
@@ -213,7 +216,6 @@
             border: 1px solid var(--border-color);
         }
 
-        /* CABECERA DESTACADA EN EL FORMULARIO */
         .card-header-title {
             display: flex;
             align-items: center;
@@ -243,6 +245,18 @@
             min-height: 80px;
             resize: vertical;
         }
+
+        /* ALERTA DE ESTADO DE ENVÍO */
+        .status-message {
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: none;
+            margin-bottom: 15px;
+        }
+        .status-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .status-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
     </style>
 </head>
 <body>
@@ -256,12 +270,12 @@
             <form onsubmit="ejecutarLogin(event)">
                 <div class="form-group">
                     <label>Usuario o Correo:</label>
-                    <input type="text" id="login-user" class="form-control" placeholder="Ej. FER" required value="Dr. Fernando">
+                    <input type="text" id="login-user" class="form-control" placeholder="Ej. FER" required>
                 </div>
                 
                 <div class="form-group">
                     <label>Contraseña:</label>
-                    <input type="password" class="form-control" placeholder="********" required value="123456">
+                    <input type="password" class="form-control" placeholder="********" required>
                 </div>
 
                 <div class="form-group">
@@ -281,20 +295,16 @@
 
     <!-- 2. DASHBOARD -->
     <div id="dashboard">
-        
-        <!-- HEADER CON ESPECIALIDAD VISIBLE A PRIMERA VISTA -->
         <header>
             <div class="header-title">Centro Médico Integral "Santa Celia"</div>
             <div class="user-info">
-                <span id="user-display">Dr. Fernando</span>
+                <span id="user-display"></span>
                 <span id="area-badge" class="specialty-badge">MEDICINA GENERAL</span>
                 <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
             </div>
         </header>
 
         <div class="main-wrapper">
-            
-            <!-- MENÚ LATERAL -->
             <aside>
                 <div class="menu-item">🏠 Inicio</div>
                 <div class="menu-item active">🩺 Registro de Atenciones</div>
@@ -303,17 +313,17 @@
                 <div class="menu-item">📁 Consultar Historial</div>
             </aside>
 
-            <!-- PANEL CENTRAL DE REGISTRO -->
             <main>
                 <div class="card">
-                    
                     <div class="card-header-title">
                         <span>📝</span>
                         <h3>Registro de Atención</h3>
                         <span id="form-area-badge" class="specialty-badge">MEDICINA GENERAL</span>
                     </div>
 
-                    <form class="form-grid">
+                    <div id="statusAlert" class="status-message"></div>
+
+                    <form id="atencionForm" class="form-grid" onsubmit="guardarEnGoogleSheets(event)">
                         <div class="form-group">
                             <label>Fecha:</label>
                             <input type="text" id="input-fecha" class="form-control" readonly>
@@ -321,46 +331,48 @@
                         
                         <div class="form-group">
                             <label>DNI del Paciente:</label>
-                            <input type="text" class="form-control" placeholder="Ingrese DNI">
+                            <input type="text" id="input-dni" class="form-control" placeholder="Ingrese DNI" required>
                         </div>
 
                         <div class="form-group full-width">
                             <label>Nombres y Apellidos del Paciente:</label>
-                            <input type="text" class="form-control" placeholder="Nombre completo">
+                            <input type="text" id="input-paciente" class="form-control" placeholder="Nombre completo" required>
                         </div>
 
                         <div class="form-group">
                             <label>Hora de Inicio:</label>
-                            <input type="time" class="form-control">
+                            <input type="time" id="input-hora-inicio" class="form-control" required>
                         </div>
 
                         <div class="form-group">
                             <label>Hora Final:</label>
-                            <input type="time" class="form-control">
+                            <input type="time" id="input-hora-final" class="form-control" required>
                         </div>
 
                         <div class="form-group full-width">
                             <label>Diagnóstico:</label>
-                            <textarea class="form-control" placeholder="Detalle del diagnóstico médico..."></textarea>
+                            <textarea id="input-diagnostico" class="form-control" placeholder="Detalle del diagnóstico médico..." required></textarea>
                         </div>
 
                         <div class="form-group full-width">
                             <label>Medicamentos Recetados:</label>
-                            <input type="text" class="form-control" placeholder="Ej. Paracetamol 500mg - 1 cada 8h">
+                            <input type="text" id="input-medicamentos" class="form-control" placeholder="Ej. Paracetamol 500mg - 1 cada 8h">
                         </div>
 
                         <div class="form-group">
                             <label>Médico Tratante:</label>
-                            <input type="text" id="input-medico" class="form-control" placeholder="Dr. / Dra. Nombre">
+                            <input type="text" id="input-medico" class="form-control" placeholder="Nombre del Médico">
                         </div>
 
                         <div class="form-group">
                             <label>Observaciones:</label>
-                            <input type="text" class="form-control" placeholder="Notas adicionales">
+                            <input type="text" id="input-observaciones" class="form-control" placeholder="Notas adicionales">
                         </div>
 
                         <div class="form-group full-width">
-                            <button type="button" class="btn-primary">Guardar Atención en Google Sheets</button>
+                            <button type="submit" id="btnGuardar" class="btn-primary">
+                                Guardar Atención en Google Sheets
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -369,7 +381,10 @@
     </div>
 
     <script>
-        // Establecer fecha actual por defecto
+        // PEGA AQUÍ LA URL DE TU WEB APP OBTENIDA EN EL PASO 1 (APPS SCRIPT)
+        const scriptURL = 'PEGA_AQUI_TU_URL_DE_APPS_SCRIPT';
+
+        // Fecha actual automática
         const hoy = new Date();
         const dia = String(hoy.getDate()).padStart(2, '0');
         const mes = String(hoy.getMonth() + 1).padStart(2, '0');
@@ -378,17 +393,14 @@
 
         function ejecutarLogin(event) {
             event.preventDefault();
-            
             const usuario = document.getElementById('login-user').value;
             const area = document.getElementById('login-area').value.toUpperCase();
 
-            // Actualizar interfaz con los datos ingresados
             document.getElementById('user-display').textContent = usuario;
             document.getElementById('area-badge').textContent = area;
             document.getElementById('form-area-badge').textContent = area;
             document.getElementById('input-medico').value = usuario;
 
-            // Transición de pantalla
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('dashboard').style.display = 'flex';
         }
@@ -396,6 +408,56 @@
         function cerrarSesion() {
             document.getElementById('dashboard').style.display = 'none';
             document.getElementById('login-screen').style.display = 'flex';
+        }
+
+        async function guardarEnGoogleSheets(event) {
+            event.preventDefault();
+            
+            const btnGuardar = document.getElementById('btnGuardar');
+            const statusAlert = document.getElementById('statusAlert');
+            
+            btnGuardar.disabled = true;
+            btnGuardar.innerText = 'Guardando...';
+            statusAlert.style.display = 'none';
+
+            const payload = {
+                fecha: document.getElementById('input-fecha').value,
+                dni: document.getElementById('input-dni').value,
+                paciente: document.getElementById('input-paciente').value,
+                horaInicio: document.getElementById('input-hora-inicio').value,
+                horaFinal: document.getElementById('input-hora-final').value,
+                diagnostico: document.getElementById('input-diagnostico').value,
+                medicamentos: document.getElementById('input-medicamentos').value,
+                medico: document.getElementById('input-medico').value,
+                observaciones: document.getElementById('input-observaciones').value
+            };
+
+            try {
+                // Enviar datos mediante solicitud POST al servidor de Google Apps Script
+                await fetch(scriptURL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Evita restricciones CORS desde GitHub Pages
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                statusAlert.className = 'status-message status-success';
+                statusAlert.innerText = '¡Atención guardada con éxito en Google Sheets!';
+                statusAlert.style.display = 'block';
+
+                // Limpiar formulario tras guardar exitosamente
+                document.getElementById('atencionForm').reset();
+                document.getElementById('input-fecha').value = `${dia}/${mes}/${anio}`;
+                document.getElementById('input-medico').value = document.getElementById('user-display').textContent;
+
+            } catch (error) {
+                statusAlert.className = 'status-message status-error';
+                statusAlert.innerText = 'Ocurrió un error al intentar guardar los datos.';
+                statusAlert.style.display = 'block';
+            } finally {
+                btnGuardar.disabled = false;
+                btnGuardar.innerText = 'Guardar Atención en Google Sheets';
+            }
         }
     </script>
 </body>
