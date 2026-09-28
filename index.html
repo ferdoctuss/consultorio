@@ -121,7 +121,7 @@
         #dashboard {
             display: none;
             width: 100%;
-            max-width: 1100px;
+            max-width: 1200px;
             flex-direction: column;
             align-items: center;
         }
@@ -319,15 +319,43 @@
             border-radius: 8px;
         }
 
-        /* ESTILOS ESPECIALES PARA CUANDO SE IMPRIME */
+        /* === BLOQUE DE FIRMA Y SELLO (Oculto en pantalla, visible al imprimir) === */
+        .print-signature-section {
+            display: none;
+            margin-top: 50px;
+            width: 100%;
+            justify-content: flex-end;
+            page-break-inside: avoid;
+        }
+
+        .signature-box {
+            width: 300px;
+            text-align: center;
+            border-top: 1.5px solid #333;
+            padding-top: 8px;
+        }
+
+        .signature-box p {
+            margin: 2px 0;
+            font-size: 0.9rem;
+            color: #222;
+            font-weight: bold;
+        }
+
+        /* === REGLAS DE IMPRESIÓN EN HORIZONTAL (LANDSCAPE) === */
         @media print {
+            @page {
+                size: landscape;
+                margin: 10mm;
+            }
             body { background: white; padding: 0; }
             #login-screen, .header-actions, .controls-row, .refresh-btn, .title-bar { display: none !important; }
             #dashboard { display: block !important; width: 100%; max-width: 100%; }
             .table-container { box-shadow: none; }
-            table { box-shadow: none; border: 1px solid #ccc; }
+            table { box-shadow: none; border: 1px solid #ccc; font-size: 11pt; }
             th { background-color: #f0f0f0 !important; color: black !important; -webkit-print-color-adjust: exact; }
             tr { break-inside: avoid; }
+            .print-signature-section { display: flex !important; }
         }
 
         /* DISEÑO MÓVIL EN TARJETAS */
@@ -473,6 +501,15 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- ESPACIO DE FIRMA Y SELLO (Aparece automáticamente al imprimir) -->
+        <div class="print-signature-section">
+            <div class="signature-box">
+                <p id="signature-doctor-name">Dr. [Nombre del Médico]</p>
+                <p>CMP: ______________</p>
+                <p>Sello y Firma</p>
+            </div>
+        </div>
     </div>
 
     <!-- SCRIPT DE LÓGICA, SEGURIDAD E IMPRESIÓN -->
@@ -495,6 +532,7 @@
         };
 
         let areaActual = "";
+        let usuarioActual = "";
 
         function ejecutarLogin(event) {
             event.preventDefault();
@@ -504,6 +542,7 @@
             const errorBox = document.getElementById('error-box');
 
             areaActual = selectArea.value;
+            usuarioActual = idInput;
             let accesoConcedido = false;
             let esSuperUser = false;
 
@@ -559,6 +598,9 @@
             const textoBadge = esSuperUser ? `${area} (SÚPER)` : area;
             document.getElementById('header-badge').textContent = textoBadge;
             document.getElementById('app-title-text').textContent = `Historial Clínico - ${area}`;
+            
+            // Asignar nombre del doctor en el bloque de firma de impresión
+            document.getElementById('signature-doctor-name').textContent = `Dr(a). ${usuarioActual.toUpperCase()}`;
         }
 
         function limpiarBusqueda() {
@@ -582,7 +624,6 @@
             }
         }
 
-        // FUNCIÓN PARA IMPRIMIR SOLAMENTE LO QUE ESTÁ FILTRADO EN PANTALLA
         function imprimirHistorialPaciente() {
             const inputVal = document.getElementById('searchInput').value.trim();
             if (inputVal === "") {
@@ -634,7 +675,6 @@
 
                 rows.forEach(row => {
                     let tr = document.createElement('tr');
-                    row.c.format = "plain";
                     row.c.forEach((cell, index) => {
                         if (index < headers.length && headers[index].label) {
                             let td = document.createElement('td');
@@ -658,6 +698,7 @@
             document.getElementById('login-pin').value = '';
             document.getElementById('login-area').selectedIndex = 0;
             areaActual = "";
+            usuarioActual = "";
         }
     </script>
 </body>
