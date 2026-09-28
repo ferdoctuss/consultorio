@@ -246,7 +246,7 @@
             resize: vertical;
         }
 
-        /* ALERTA DE ESTADO DE ENVÍO */
+        /* MENSAJE DE NOTIFICACIÓN */
         .status-message {
             padding: 12px;
             border-radius: 6px;
@@ -270,7 +270,7 @@
             <form onsubmit="ejecutarLogin(event)">
                 <div class="form-group">
                     <label>Usuario o Correo:</label>
-                    <input type="text" id="login-user" class="form-control" placeholder="Ej. FER" required>
+                    <input type="text" id="login-user" class="form-control" placeholder="Ingrese su usuario" required>
                 </div>
                 
                 <div class="form-group">
@@ -298,7 +298,6 @@
         <header>
             <div class="header-title">Centro Médico Integral "Santa Celia"</div>
             <div class="user-info">
-                <span id="user-display"></span>
                 <span id="area-badge" class="specialty-badge">MEDICINA GENERAL</span>
                 <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
             </div>
@@ -331,7 +330,7 @@
                         
                         <div class="form-group">
                             <label>DNI del Paciente:</label>
-                            <input type="text" id="input-dni" class="form-control" placeholder="Ingrese DNI" required>
+                            <input type="text" id="input-dni" class="form-control" placeholder="Ingrese DNI" required maxlength="8">
                         </div>
 
                         <div class="form-group full-width">
@@ -380,11 +379,12 @@
         </div>
     </div>
 
+    <!-- SCRIPT JAVASCRIPT INTEGRADO -->
     <script>
-        // PEGA AQUÍ LA URL DE TU WEB APP OBTENIDA EN EL PASO 1 (APPS SCRIPT)
-        const scriptURL = 'PEGA_AQUI_TU_URL_DE_APPS_SCRIPT';
+        // URL VINCULADA DE TU GOOGLE APPS SCRIPT
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbx9opki9itcB5WDEZBtu-ylzEZqDHqWa_Ejw3XyGu9z9MQ4s6-_Rp5b_qbuLuZ3JYcl/exec';
 
-        // Fecha actual automática
+        // Autocompletar la fecha actual al cargar
         const hoy = new Date();
         const dia = String(hoy.getDate()).padStart(2, '0');
         const mes = String(hoy.getMonth() + 1).padStart(2, '0');
@@ -396,7 +396,6 @@
             const usuario = document.getElementById('login-user').value;
             const area = document.getElementById('login-area').value.toUpperCase();
 
-            document.getElementById('user-display').textContent = usuario;
             document.getElementById('area-badge').textContent = area;
             document.getElementById('form-area-badge').textContent = area;
             document.getElementById('input-medico').value = usuario;
@@ -417,42 +416,45 @@
             const statusAlert = document.getElementById('statusAlert');
             
             btnGuardar.disabled = true;
-            btnGuardar.innerText = 'Guardando...';
+            btnGuardar.innerText = 'Guardando en Google Sheets...';
             statusAlert.style.display = 'none';
 
-            const payload = {
-                fecha: document.getElementById('input-fecha').value,
-                dni: document.getElementById('input-dni').value,
-                paciente: document.getElementById('input-paciente').value,
-                horaInicio: document.getElementById('input-hora-inicio').value,
-                horaFinal: document.getElementById('input-hora-final').value,
-                diagnostico: document.getElementById('input-diagnostico').value,
-                medicamentos: document.getElementById('input-medicamentos').value,
-                medico: document.getElementById('input-medico').value,
-                observaciones: document.getElementById('input-observaciones').value
-            };
+            // Parámetros formateados para Apps Script
+            const formData = new URLSearchParams();
+            formData.append('fecha', document.getElementById('input-fecha').value);
+            formData.append('horaInicio', document.getElementById('input-hora-inicio').value);
+            formData.append('horaFinal', document.getElementById('input-hora-final').value);
+            formData.append('nombres', document.getElementById('input-paciente').value);
+            formData.append('dni', document.getElementById('input-dni').value);
+            formData.append('diagnostico', document.getElementById('input-diagnostico').value);
+            formData.append('medicamentos', document.getElementById('input-medicamentos').value);
+            formData.append('medico', document.getElementById('input-medico').value);
+            formData.append('observaciones', document.getElementById('input-observaciones').value);
 
             try {
-                // Enviar datos mediante solicitud POST al servidor de Google Apps Script
+                // Envío de datos por método POST
                 await fetch(scriptURL, {
                     method: 'POST',
-                    mode: 'no-cors', // Evita restricciones CORS desde GitHub Pages
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: formData.toString()
                 });
 
                 statusAlert.className = 'status-message status-success';
-                statusAlert.innerText = '¡Atención guardada con éxito en Google Sheets!';
+                statusAlert.innerText = '¡Atención guardada correctamente en Google Sheets!';
                 statusAlert.style.display = 'block';
 
-                // Limpiar formulario tras guardar exitosamente
+                // Limpiar campos del formulario conservando fecha y médico
+                const medicoActual = document.getElementById('input-medico').value;
                 document.getElementById('atencionForm').reset();
                 document.getElementById('input-fecha').value = `${dia}/${mes}/${anio}`;
-                document.getElementById('input-medico').value = document.getElementById('user-display').textContent;
+                document.getElementById('input-medico').value = medicoActual;
 
             } catch (error) {
                 statusAlert.className = 'status-message status-error';
-                statusAlert.innerText = 'Ocurrió un error al intentar guardar los datos.';
+                statusAlert.innerText = 'Error de conexión al intentar guardar los datos.';
                 statusAlert.style.display = 'block';
             } finally {
                 btnGuardar.disabled = false;
