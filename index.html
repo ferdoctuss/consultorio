@@ -325,47 +325,47 @@
                     <form id="atencionForm" class="form-grid" onsubmit="guardarEnGoogleSheets(event)">
                         <div class="form-group">
                             <label>Fecha:</label>
-                            <input type="text" id="input-fecha" class="form-control" readonly>
+                            <input type="text" id="input-fecha" name="fecha" class="form-control" readonly>
                         </div>
                         
                         <div class="form-group">
                             <label>DNI del Paciente:</label>
-                            <input type="text" id="input-dni" class="form-control" placeholder="Ingrese DNI" required maxlength="8">
+                            <input type="text" id="input-dni" name="dni" class="form-control" placeholder="Ingrese DNI" required maxlength="8">
                         </div>
 
                         <div class="form-group full-width">
                             <label>Nombres y Apellidos del Paciente:</label>
-                            <input type="text" id="input-paciente" class="form-control" placeholder="Nombre completo" required>
+                            <input type="text" id="input-paciente" name="nombres" class="form-control" placeholder="Nombre completo" required>
                         </div>
 
                         <div class="form-group">
                             <label>Hora de Inicio:</label>
-                            <input type="time" id="input-hora-inicio" class="form-control" required>
+                            <input type="time" id="input-hora-inicio" name="horaInicio" class="form-control" required>
                         </div>
 
                         <div class="form-group">
                             <label>Hora Final:</label>
-                            <input type="time" id="input-hora-final" class="form-control" required>
+                            <input type="time" id="input-hora-final" name="horaFinal" class="form-control" required>
                         </div>
 
                         <div class="form-group full-width">
                             <label>Diagnóstico:</label>
-                            <textarea id="input-diagnostico" class="form-control" placeholder="Detalle del diagnóstico médico..." required></textarea>
+                            <textarea id="input-diagnostico" name="diagnostico" class="form-control" placeholder="Detalle del diagnóstico médico..." required></textarea>
                         </div>
 
                         <div class="form-group full-width">
                             <label>Medicamentos Recetados:</label>
-                            <input type="text" id="input-medicamentos" class="form-control" placeholder="Ej. Paracetamol 500mg - 1 cada 8h">
+                            <input type="text" id="input-medicamentos" name="medicamentos" class="form-control" placeholder="Ej. Paracetamol 500mg - 1 cada 8h">
                         </div>
 
                         <div class="form-group">
                             <label>Médico Tratante:</label>
-                            <input type="text" id="input-medico" class="form-control" placeholder="Nombre del Médico">
+                            <input type="text" id="input-medico" name="medico" class="form-control" placeholder="Nombre del Médico">
                         </div>
 
                         <div class="form-group">
                             <label>Observaciones:</label>
-                            <input type="text" id="input-observaciones" class="form-control" placeholder="Notas adicionales">
+                            <input type="text" id="input-observaciones" name="observaciones" class="form-control" placeholder="Notas adicionales">
                         </div>
 
                         <div class="form-group full-width">
@@ -381,7 +381,6 @@
 
     <!-- SCRIPT JAVASCRIPT INTEGRADO -->
     <script>
-        // URL VINCULADA DE TU GOOGLE APPS SCRIPT
         const scriptURL = 'https://script.google.com/macros/s/AKfycbx9opki9itcB5WDEZBtu-ylzEZqDHqWa_Ejw3XyGu9z9MQ4s6-_Rp5b_qbuLuZ3JYcl/exec';
 
         // Autocompletar la fecha actual al cargar
@@ -409,57 +408,44 @@
             document.getElementById('login-screen').style.display = 'flex';
         }
 
-        async function guardarEnGoogleSheets(event) {
+        function guardarEnGoogleSheets(event) {
             event.preventDefault();
             
             const btnGuardar = document.getElementById('btnGuardar');
             const statusAlert = document.getElementById('statusAlert');
+            const form = document.getElementById('atencionForm');
             
             btnGuardar.disabled = true;
             btnGuardar.innerText = 'Guardando en Google Sheets...';
             statusAlert.style.display = 'none';
 
-            // Parámetros formateados para Apps Script
-            const formData = new URLSearchParams();
-            formData.append('fecha', document.getElementById('input-fecha').value);
-            formData.append('horaInicio', document.getElementById('input-hora-inicio').value);
-            formData.append('horaFinal', document.getElementById('input-hora-final').value);
-            formData.append('nombres', document.getElementById('input-paciente').value);
-            formData.append('dni', document.getElementById('input-dni').value);
-            formData.append('diagnostico', document.getElementById('input-diagnostico').value);
-            formData.append('medicamentos', document.getElementById('input-medicamentos').value);
-            formData.append('medico', document.getElementById('input-medico').value);
-            formData.append('observaciones', document.getElementById('input-observaciones').value);
+            // Capturar directamente todos los inputs con sus atributos 'name'
+            const formData = new FormData(form);
 
-            try {
-                // Envío de datos por método POST
-                await fetch(scriptURL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: formData.toString()
-                });
-
+            fetch(scriptURL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: formData
+            })
+            .then(() => {
                 statusAlert.className = 'status-message status-success';
                 statusAlert.innerText = '¡Atención guardada correctamente en Google Sheets!';
                 statusAlert.style.display = 'block';
 
-                // Limpiar campos del formulario conservando fecha y médico
                 const medicoActual = document.getElementById('input-medico').value;
-                document.getElementById('atencionForm').reset();
+                form.reset();
                 document.getElementById('input-fecha').value = `${dia}/${mes}/${anio}`;
                 document.getElementById('input-medico').value = medicoActual;
-
-            } catch (error) {
+            })
+            .catch(error => {
                 statusAlert.className = 'status-message status-error';
-                statusAlert.innerText = 'Error de conexión al intentar guardar los datos.';
+                statusAlert.innerText = 'Ocurrió un error al intentar guardar los datos.';
                 statusAlert.style.display = 'block';
-            } finally {
+            })
+            .finally(() => {
                 btnGuardar.disabled = false;
                 btnGuardar.innerText = 'Guardar Atención en Google Sheets';
-            }
+            });
         }
     </script>
 </body>
