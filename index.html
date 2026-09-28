@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>C.M.I. "Santa Celia" - Medicina General</title>
+
     <style>
         :root {
             --primary-color: #0056b3;
@@ -13,93 +14,272 @@
             --border-color: #e2e8f0;
             --text-color: #333333;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-color); min-height: 100vh; }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+        }
 
         /* LOGIN */
         #login-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #0081c9; display: flex; justify-content: center; align-items: center; z-index: 1000;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0081c9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
         }
+
         .login-card {
-            background: white; padding: 35px 30px; border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15); width: 100%; max-width: 420px; text-align: center;
+            background: white;
+            padding: 35px 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
         }
-        .login-card h2 { color: var(--primary-color); font-size: 1.5rem; margin-bottom: 6px; font-weight: 800; }
-        .login-card p { color: #666; font-size: 0.9rem; margin-bottom: 25px; }
-        .form-group { text-align: left; margin-bottom: 18px; }
-        .form-group label { display: block; font-weight: 700; font-size: 0.88rem; margin-bottom: 6px; color: #222; }
-        .form-control { width: 100%; padding: 10px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.95rem; outline: none; }
-        .form-control:focus { border-color: var(--primary-color); }
+
+        .login-card h2 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-bottom: 6px;
+            font-weight: 800;
+        }
+
+        .login-card p {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            text-align: left;
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 700;
+            font-size: 0.88rem;
+            margin-bottom: 6px;
+            color: #222;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+        }
+
         .btn-primary {
-            width: 100%; background: var(--primary-color); color: white; border: none;
-            padding: 12px; border-radius: 6px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 10px;
+            width: 100%;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 10px;
         }
-        .btn-primary:hover { background: var(--primary-dark); }
-        .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
 
         /* DASHBOARD */
-        #dashboard { display: none; flex-direction: column; min-height: 100vh; }
-        header {
-            background: white; border-bottom: 1px solid var(--border-color);
-            padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; height: 60px;
+        #dashboard {
+            display: none;
+            flex-direction: column;
+            min-height: 100vh;
         }
-        .header-title { color: var(--primary-color); font-weight: 800; font-size: 1.2rem; }
-        .user-info { display: flex; align-items: center; gap: 12px; font-size: 0.9rem; }
-        .specialty-badge {
-            background-color: #e3f2fd; color: #0d47a1; font-weight: 800;
-            padding: 6px 14px; border-radius: 20px; font-size: 0.82rem; border: 1px solid #bbdefb; text-transform: uppercase;
-        }
-        .btn-logout { background-color: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.82rem; }
-        
-        .main-wrapper { display: flex; flex: 1; }
-        aside { width: var(--sidebar-width); background: white; border-right: 1px solid var(--border-color); padding: 20px 0; }
-        .menu-item { display: flex; align-items: center; gap: 10px; padding: 12px 20px; color: #444; text-decoration: none; font-weight: 600; font-size: 0.9rem; }
-        .menu-item.active { background-color: #e8f0fe; color: var(--primary-color); border-left: 4px solid var(--primary-color); }
-        
-        main { flex: 1; padding: 24px; max-width: 900px; }
-        .card { background: white; border-radius: 8px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid var(--border-color); }
-        .card-header-title { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid var(--bg-color); }
-        .card-header-title h3 { color: var(--primary-color); font-size: 1.25rem; font-weight: 800; }
-        
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        .full-width { grid-column: span 2; }
-        textarea.form-control { min-height: 80px; resize: vertical; }
 
-        .status-message { padding: 12px; border-radius: 6px; font-size: 0.9rem; font-weight: 600; display: none; margin-bottom: 15px; }
-        .status-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .status-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        header {
+            background: white;
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+        }
+
+        .header-title {
+            color: var(--primary-color);
+            font-weight: 800;
+            font-size: 1.2rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.9rem;
+        }
+
+        .specialty-badge {
+            background-color: #e3f2fd;
+            color: #0d47a1;
+            font-weight: 800;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            letter-spacing: 0.5px;
+            border: 1px solid #bbdefb;
+            text-transform: uppercase;
+        }
+
+        .btn-logout {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.82rem;
+        }
+
+        .main-wrapper {
+            display: flex;
+            flex: 1;
+        }
+
+        aside {
+            width: var(--sidebar-width);
+            background: white;
+            border-right: 1px solid var(--border-color);
+            padding: 20px 0;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            color: #444;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background-color: #e8f0fe;
+            color: var(--primary-color);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        main {
+            flex: 1;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            min-height: 600px;
+        }
+
+        .card-header-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            background: #fafafa;
+        }
+
+        .card-header-title h3 {
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            font-weight: 800;
+        }
+
+        /* CONTENEDOR PARA EL VISOR (IFRAME DE APPSHEET U OTROS) */
+        .viewer-container {
+            position: relative;
+            flex: 1;
+            width: 100%;
+            height: 100%;
+        }
+
+        .viewer-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
     </style>
 </head>
 <body>
 
-    <!-- LOGIN -->
+    <!-- 1. LOGIN -->
     <div id="login-screen">
         <div class="login-card">
             <h2>C.M.I. "Santa Celia"</h2>
             <p>Ingrese sus credenciales de trabajador</p>
+            
             <form onsubmit="ejecutarLogin(event)">
                 <div class="form-group">
                     <label>Usuario o Correo:</label>
                     <input type="text" id="login-user" class="form-control" placeholder="Ej. Dr. Juan" required>
                 </div>
+                
                 <div class="form-group">
                     <label>Contraseña:</label>
                     <input type="password" class="form-control" placeholder="********" required>
                 </div>
+
                 <div class="form-group">
                     <label>Especialidad / Área:</label>
                     <select id="login-area" class="form-control">
                         <option value="Medicina General" selected>Medicina General</option>
                         <option value="Odontología">Odontología</option>
+                        <option value="Pediatría">Pediatría</option>
+                        <option value="Ginecología">Ginecología</option>
                     </select>
                 </div>
+
                 <button type="submit" class="btn-primary">Ingresar al Sistema</button>
             </form>
         </div>
     </div>
 
-    <!-- DASHBOARD -->
+    <!-- 2. DASHBOARD / VISOR -->
     <div id="dashboard">
         <header>
             <div class="header-title">Centro Médico Integral "Santa Celia"</div>
@@ -111,84 +291,34 @@
 
         <div class="main-wrapper">
             <aside>
-                <div class="menu-item active">🩺 Registro de Atenciones</div>
-                <div class="menu-item">💊 Control de Medicamentos</div>
-                <div class="menu-item">📅 Agendar Citas</div>
+                <div class="menu-item active">📊 Visor General</div>
+                <div class="menu-item">📁 Historial de Atenciones</div>
             </aside>
 
             <main>
                 <div class="card">
                     <div class="card-header-title">
-                        <h3>Registro de Atención</h3>
+                        <h3>Panel de Visualización</h3>
                         <span id="form-area-badge" class="specialty-badge">MEDICINA GENERAL</span>
                     </div>
 
-                    <div id="statusAlert" class="status-message"></div>
-
-                    <form id="atencionForm" class="form-grid" onsubmit="guardarEnGoogleSheets(event)">
-                        <div class="form-group">
-                            <label>Fecha:</label>
-                            <input type="text" id="input-fecha" name="fecha" class="form-control" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label>DNI del Paciente:</label>
-                            <input type="text" id="input-dni" name="dni" class="form-control" placeholder="Ingrese DNI" required maxlength="8">
-                        </div>
-                        <div class="form-group full-width">
-                            <label>Nombres y Apellidos del Paciente:</label>
-                            <input type="text" id="input-paciente" name="nombres" class="form-control" placeholder="Nombre completo" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Hora de Inicio:</label>
-                            <input type="time" id="input-hora-inicio" name="horaInicio" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Hora Final:</label>
-                            <input type="time" id="input-hora-final" name="horaFinal" class="form-control" required>
-                        </div>
-                        <div class="form-group full-width">
-                            <label>Diagnóstico:</label>
-                            <textarea id="input-diagnostico" name="diagnostico" class="form-control" placeholder="Detalle..." required></textarea>
-                        </div>
-                        <div class="form-group full-width">
-                            <label>Medicamentos Recetados:</label>
-                            <input type="text" id="input-medicamentos" name="medicamentos" class="form-control" placeholder="Ej. Paracetamol">
-                        </div>
-                        <div class="form-group">
-                            <label>Médico Tratante:</label>
-                            <input type="text" id="input-medico" name="medico" class="form-control" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label>Observaciones:</label>
-                            <input type="text" id="input-observaciones" name="observaciones" class="form-control" placeholder="Notas">
-                        </div>
-                        <div class="form-group full-width">
-                            <button type="submit" id="btnGuardar" class="btn-primary">Guardar Atención en Google Sheets</button>
-                        </div>
-                    </form>
+                    <!-- AQUÍ PUEDES INCRUSTAR TU VISTA DE APPSHEET O GOOGLE SHEETS -->
+                    <div class="viewer-container">
+                        <iframe src="PEGA_AQUI_EL_ENLACE_DE_INCRUSTACION_DE_APPSHEET" allowfullscreen></iframe>
+                    </div>
                 </div>
             </main>
         </div>
     </div>
 
+    <!-- SCRIPT DE NAVEGACIÓN Y LOGIN -->
     <script>
-        // URL ACTUALIZADA DE TU APLICACIÓN WEB DE APPS SCRIPT
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbwQapil_hqSXDkIbMGG0LrKFExFw3gxTY7S634yvFhwkfP6zGyYBCaRRUQmDQ6MornZdA/exec';
-
-        const hoy = new Date();
-        const dia = String(hoy.getDate()).padStart(2, '0');
-        const mes = String(hoy.getMonth() + 1).padStart(2, '0');
-        const anio = hoy.getFullYear();
-        document.getElementById('input-fecha').value = `${dia}/${mes}/${anio}`;
-
         function ejecutarLogin(event) {
             event.preventDefault();
-            const usuario = document.getElementById('login-user').value;
             const area = document.getElementById('login-area').value.toUpperCase();
 
             document.getElementById('area-badge').textContent = area;
             document.getElementById('form-area-badge').textContent = area;
-            document.getElementById('input-medico').value = usuario;
 
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('dashboard').style.display = 'flex';
@@ -197,54 +327,6 @@
         function cerrarSesion() {
             document.getElementById('dashboard').style.display = 'none';
             document.getElementById('login-screen').style.display = 'flex';
-        }
-
-        async function guardarEnGoogleSheets(event) {
-            event.preventDefault();
-            
-            const btnGuardar = document.getElementById('btnGuardar');
-            const statusAlert = document.getElementById('statusAlert');
-            const form = document.getElementById('atencionForm');
-            
-            btnGuardar.disabled = true;
-            btnGuardar.innerText = 'Guardando...';
-            statusAlert.style.display = 'none';
-
-            const formData = new URLSearchParams();
-            formData.append('fecha', document.getElementById('input-fecha').value);
-            formData.append('horaInicio', document.getElementById('input-hora-inicio').value);
-            formData.append('horaFinal', document.getElementById('input-hora-final').value);
-            formData.append('nombres', document.getElementById('input-paciente').value);
-            formData.append('dni', document.getElementById('input-dni').value);
-            formData.append('diagnostico', document.getElementById('input-diagnostico').value);
-            formData.append('medicamentos', document.getElementById('input-medicamentos').value);
-            formData.append('medico', document.getElementById('input-medico').value);
-            formData.append('observaciones', document.getElementById('input-observaciones').value);
-
-            try {
-                await fetch(scriptURL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: formData.toString()
-                });
-
-                statusAlert.className = 'status-message status-success';
-                statusAlert.innerText = '¡Atención guardada correctamente en Google Sheets!';
-                statusAlert.style.display = 'block';
-
-                const medicoActual = document.getElementById('input-medico').value;
-                form.reset();
-                document.getElementById('input-fecha').value = `${dia}/${mes}/${anio}`;
-                document.getElementById('input-medico').value = medicoActual;
-
-            } catch (error) {
-                statusAlert.className = 'status-message status-error';
-                statusAlert.innerText = 'Ocurrió un error al enviar.';
-                statusAlert.style.display = 'block';
-            } finally {
-                btnGuardar.disabled = false;
-                btnGuardar.innerText = 'Guardar Atención en Google Sheets';
-            }
         }
     </script>
 </body>
