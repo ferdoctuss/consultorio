@@ -322,39 +322,44 @@
         /* === BLOQUE DE FIRMA Y SELLO (Oculto en pantalla, visible al imprimir) === */
         .print-signature-section {
             display: none;
-            margin-top: 50px;
+            margin-top: 80px; /* Amplio espacio respecto a los diagnósticos */
             width: 100%;
             justify-content: flex-end;
             page-break-inside: avoid;
         }
 
         .signature-box {
-            width: 300px;
+            width: 320px;
             text-align: center;
             border-top: 1.5px solid #333;
-            padding-top: 8px;
+            padding-top: 10px;
         }
 
         .signature-box p {
-            margin: 2px 0;
-            font-size: 0.9rem;
+            margin: 4px 0;
+            font-size: 0.95rem;
             color: #222;
             font-weight: bold;
+            text-align: left;
         }
 
-        /* === REGLAS DE IMPRESIÓN EN HORIZONTAL (LANDSCAPE) === */
+        /* === REGLAS DE IMPRESIÓN EN HORIZONTAL (LANDSCAPE) Y LIMPIEZA DE URLS === */
         @media print {
             @page {
                 size: landscape;
-                margin: 10mm;
+                margin: 15mm;
             }
             body { background: white; padding: 0; }
+            
+            /* Ocultar elementos de navegación y entorno web, incluidos encabezados y pies de página automáticos del navegador */
             #login-screen, .header-actions, .controls-row, .refresh-btn, .title-bar { display: none !important; }
+            
             #dashboard { display: block !important; width: 100%; max-width: 100%; }
             .table-container { box-shadow: none; }
             table { box-shadow: none; border: 1px solid #ccc; font-size: 11pt; }
             th { background-color: #f0f0f0 !important; color: black !important; -webkit-print-color-adjust: exact; }
             tr { break-inside: avoid; }
+            
             .print-signature-section { display: flex !important; }
         }
 
@@ -505,9 +510,9 @@
         <!-- ESPACIO DE FIRMA Y SELLO (Aparece automáticamente al imprimir) -->
         <div class="print-signature-section">
             <div class="signature-box">
-                <p id="signature-doctor-name">Dr. [Nombre del Médico]</p>
-                <p>CMP: ______________</p>
-                <p>Sello y Firma</p>
+                <p>Dr(a). : __________________________________</p>
+                <p>CMP : __________________</p>
+                <p style="text-align: center; margin-top: 15px; font-weight: normal;">Sello y Firma</p>
             </div>
         </div>
     </div>
@@ -532,7 +537,6 @@
         };
 
         let areaActual = "";
-        let usuarioActual = "";
 
         function ejecutarLogin(event) {
             event.preventDefault();
@@ -542,7 +546,6 @@
             const errorBox = document.getElementById('error-box');
 
             areaActual = selectArea.value;
-            usuarioActual = idInput;
             let accesoConcedido = false;
             let esSuperUser = false;
 
@@ -598,9 +601,6 @@
             const textoBadge = esSuperUser ? `${area} (SÚPER)` : area;
             document.getElementById('header-badge').textContent = textoBadge;
             document.getElementById('app-title-text').textContent = `Historial Clínico - ${area}`;
-            
-            // Asignar nombre del doctor en el bloque de firma de impresión
-            document.getElementById('signature-doctor-name').textContent = `Dr(a). ${usuarioActual.toUpperCase()}`;
         }
 
         function limpiarBusqueda() {
@@ -698,7 +698,6 @@
             document.getElementById('login-pin').value = '';
             document.getElementById('login-area').selectedIndex = 0;
             areaActual = "";
-            usuarioActual = "";
         }
     </script>
 </body>
