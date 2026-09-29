@@ -19,7 +19,7 @@
             background-color: var(--page-bg);
             color: var(--text-color);
             margin: 0;
-            padding: 15px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -112,11 +112,11 @@
             font-weight: 600;
         }
 
-        /* === DASHBOARD GENERAL === */
+        /* === DASHBOARD GENERAL EXPANDIDO A LA PANTALLA === */
         #dashboard {
             display: none;
             width: 100%;
-            max-width: 1000px;
+            max-width: 1350px; /* Ampliado para aprovechar monitores modernos 16:9 */
             flex-direction: column;
             align-items: center;
         }
@@ -142,7 +142,7 @@
         .brand h1 {
             color: #263238;
             margin: 0;
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             font-weight: 800;
             text-transform: uppercase;
         }
@@ -179,24 +179,25 @@
         /* SECCIÓN DE NUEVO REGISTRO (FORMULARIO) */
         .card-form {
             background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
             width: 100%;
             margin-bottom: 20px;
             box-sizing: border-box;
         }
-        .card-form h3 { margin-top: 0; color: var(--primary-color); }
+        .card-form h3 { margin-top: 0; color: var(--primary-color); margin-bottom: 20px; }
         
         .form-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-columns: repeat(4, 1fr); /* Organizado en 4 columnas fluidas para aprovechar el ancho */
             gap: 15px;
         }
 
-        .full-width {
-            grid-column: 1 / -1;
-        }
+        .span-1 { grid-column: span 1; }
+        .span-2 { grid-column: span 2; }
+        .span-3 { grid-column: span 3; }
+        .span-4 { grid-column: span 4; } /* Ocupa todo el ancho */
 
         .controls-row {
             width: 100%;
@@ -257,7 +258,7 @@
             margin-top: 10px;
         }
 
-        /* === CONTENEDOR DE TARJETAS DE REGISTROS GRANDES === */
+        /* === CONTENEDOR DE TARJETAS DE REGISTROS === */
         .cards-container {
             width: 100%;
             display: flex;
@@ -302,7 +303,7 @@
 
         .record-patient-info {
             display: grid;
-            grid-template-columns: 2fr 1fr;
+            grid-template-columns: 3fr 1fr;
             gap: 15px;
             background: #f8f9fa;
             padding: 12px 15px;
@@ -350,7 +351,7 @@
             font-size: 0.95rem;
             color: #333;
             word-break: break-word;
-            white-space: pre-wrap; /* Permite ver textos largos correctamente formateados */
+            white-space: pre-wrap;
             line-height: 1.4;
         }
 
@@ -417,6 +418,12 @@
         .modal-buttons { display: flex; gap: 10px; justify-content: center; }
         .btn-modal-cancel { background: #6c757d; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
         .btn-modal-confirm { background: #dc3545; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+
+        /* Adaptación automática para pantallas móviles o tablets pequeñas */
+        @media (max-width: 900px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .span-1, .span-2, .span-3, .span-4 { grid-column: span 1; }
+        }
 
         @media print {
             #login-screen, .header-actions, .controls-row, .refresh-btn, .title-bar, .card-form, .btn-delete { display: none !important; }
@@ -486,52 +493,53 @@
                 </div>
             </div>
 
-            <!-- FORMULARIO PARA NUEVO INGRESO DE DATOS -->
+            <!-- FORMULARIO PARA NUEVO INGRESO DE DATOS AMPLIADO -->
             <div class="card-form" id="formRegistroContainer">
                 <h3>Nuevo Registro Clínico</h3>
                 <form id="formRegistro" onsubmit="enviarDatos(event)">
                     <div class="form-grid">
-                        <div class="form-group">
+                        <!-- Fila superior: Fecha, Hora Inicio, Hora Final -->
+                        <div class="form-group span-1">
                             <label>Fecha:</label>
                             <input type="text" id="fecha" class="form-control" disabled style="background-color: #e9ecef; color: #6c757d;">
                         </div>
-                        <div class="form-group">
+                        <div class="form-group span-1">
                             <label>Hora de Inicio:</label>
                             <input type="time" id="horaInicio" class="form-control" required>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group span-1">
                             <label>Hora Final:</label>
                             <input type="time" id="horaFinal" class="form-control" required>
                         </div>
-
-                        <div class="form-group full-width">
-                            <label>Nombres y Apellidos:</label>
-                            <input type="text" id="nombres" class="form-control" placeholder="Nombre completo del paciente" required>
-                        </div>
-
-                        <div class="form-group full-width">
+                        <div class="form-group span-1">
                             <label>DNI:</label>
                             <input type="text" id="dni" class="form-control" maxlength="8" placeholder="DNI del paciente" required>
                         </div>
 
-                        <div class="form-group full-width">
+                        <!-- Siguientes campos distribuidos a lo ancho -->
+                        <div class="form-group span-4">
+                            <label>Nombres y Apellidos:</label>
+                            <input type="text" id="nombres" class="form-control" placeholder="Nombre completo del paciente" required>
+                        </div>
+
+                        <div class="form-group span-4">
                             <label>Diagnóstico:</label>
                             <input type="text" id="diagnostico" class="form-control" placeholder="Diagnóstico médico" required>
                         </div>
-                        <div class="form-group full-width">
+                        <div class="form-group span-4">
                             <label>Medicamentos:</label>
                             <input type="text" id="medicamentos" class="form-control" placeholder="Receta o fármacos">
                         </div>
-                        <div class="form-group full-width">
+                        <div class="form-group span-4">
                             <label>Médico:</label>
                             <input type="text" id="medico" class="form-control" placeholder="Nombre del doctor" required>
                         </div>
-                        <div class="form-group full-width">
+                        <div class="form-group span-4">
                             <label>Observaciones:</label>
                             <input type="text" id="observaciones" class="form-control" placeholder="Notas adicionales">
                         </div>
                     </div>
-                    <button type="submit" id="btnGuardar" class="btn-primary-login" style="margin-top: 15px;">Subir a la Base de Datos</button>
+                    <button type="submit" id="btnGuardar" class="btn-primary-login" style="margin-top: 20px; padding: 14px; font-size: 1.05rem;">Subir a la Base de Datos</button>
                 </form>
                 <div id="msgEstado" style="text-align: center; margin-top: 10px; font-weight: bold;"></div>
             </div>
@@ -570,7 +578,7 @@
 
         let areaActual = "";
         let idParaEliminar = null;
-        let registrosCache = []; // Almacena los datos para el filtrado rápido
+        let registrosCache = [];
 
         function obtenerFechaHoraActual() {
             const ahora = new Date();
@@ -717,12 +725,11 @@
                 const data = JSON.parse(jsonString);
 
                 registrosCache = [];
-                const rows = data.table.rows.reverse(); // Últimos ingresos primero
+                const rows = data.table.rows.reverse();
 
                 rows.forEach(row => {
                     let obj = {};
                     row.c.forEach((cell, index) => {
-                        let labelCol = data.table.cols[index] ? data.table.cols[index].label : '';
                         let valor = (cell && cell.f) ? cell.f : (cell && cell.v ? cell.v : '-');
                         obj[index] = valor;
                     });
