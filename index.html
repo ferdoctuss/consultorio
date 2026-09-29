@@ -497,7 +497,6 @@
                 <h3>Nuevo Registro Clínico</h3>
                 <form id="formRegistro" onsubmit="enviarDatos(event)">
                     <div class="form-grid">
-                        <!-- Fila 1: ID (gris), Fecha (gris), Hora Inicio, Hora Final -->
                         <div class="form-group span-1">
                             <label>ID Automático:</label>
                             <input type="text" id="idGenerado" class="form-control" disabled style="background-color: #e9ecef; color: #6c757d; font-weight: bold;">
@@ -515,7 +514,6 @@
                             <input type="time" id="horaFinal" class="form-control" required>
                         </div>
 
-                        <!-- Fila 2: Nombres y Apellidos (largo) + DNI (al costado) -->
                         <div class="form-group span-3">
                             <label>Nombres y Apellidos:</label>
                             <input type="text" id="nombres" class="form-control" placeholder="Nombre completo del paciente" required>
@@ -525,7 +523,6 @@
                             <input type="text" id="dni" class="form-control" maxlength="8" placeholder="DNI del paciente" required>
                         </div>
 
-                        <!-- Filas siguientes con ancho completo -->
                         <div class="form-group span-4">
                             <label>Diagnóstico:</label>
                             <input type="text" id="diagnostico" class="form-control" placeholder="Diagnóstico médico" required>
@@ -743,11 +740,16 @@
                 registrosCache = [];
                 const rows = data.table.rows.reverse();
 
-                rows.forEach(row => {
+                // Ignoramos la primera fila (índice 0) si contiene los títulos de las cabeceras
+                rows.forEach((row, index) => {
+                    // Verificamos si la primera celda es exactamente el título "ID" para evitar que se cuele
+                    let primerValor = (row.c[0] && row.c[0].v) ? String(row.c[0].v) : '';
+                    if (primerValor.toUpperCase() === 'ID') return; 
+
                     let obj = {};
-                    row.c.forEach((cell, index) => {
+                    row.c.forEach((cell, cellIndex) => {
                         let valor = (cell && cell.f) ? cell.f : (cell && cell.v ? cell.v : '-');
-                        obj[index] = valor;
+                        obj[cellIndex] = valor;
                     });
                     registrosCache.push(obj);
                 });
