@@ -116,7 +116,7 @@
         #dashboard {
             display: none;
             width: 100%;
-            max-width: 1200px;
+            max-width: 1000px;
             flex-direction: column;
             align-items: center;
         }
@@ -257,20 +257,140 @@
             margin-top: 10px;
         }
 
-        /* BOTÓN DE ELIMINAR EN TABLA */
+        /* === CONTENEDOR DE TARJETAS DE REGISTROS GRANDES === */
+        .cards-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .record-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-left: 6px solid var(--primary-color);
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            transition: transform 0.2s;
+        }
+
+        .record-card:hover {
+            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+        }
+
+        .record-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .record-id {
+            font-weight: bold;
+            color: var(--primary-color);
+            background: var(--primary-bg);
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .record-patient-info {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 15px;
+            background: #f8f9fa;
+            padding: 12px 15px;
+            border-radius: 8px;
+        }
+
+        .info-item span {
+            display: block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: #777;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+
+        .info-item strong {
+            font-size: 1rem;
+            color: #222;
+        }
+
+        .record-details {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .detail-box {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 10px 14px;
+        }
+
+        .detail-box label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .detail-box p {
+            margin: 0;
+            font-size: 0.95rem;
+            color: #333;
+            word-break: break-word;
+            white-space: pre-wrap; /* Permite ver textos largos correctamente formateados */
+            line-height: 1.4;
+        }
+
+        .record-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+
+        .medico-tag {
+            font-size: 0.9rem;
+            color: #555;
+            font-weight: 600;
+        }
+
         .btn-delete {
             background-color: #dc3545;
             color: white;
             border: none;
-            padding: 6px 10px;
-            border-radius: 4px;
+            padding: 8px 14px;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             font-weight: bold;
             transition: background 0.2s;
         }
         .btn-delete:hover {
             background-color: #bd2130;
+        }
+
+        .loading-card {
+            background: white;
+            padding: 40px;
+            text-align: center;
+            font-weight: bold;
+            color: var(--primary-color);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
 
         /* MODAL DE ADVERTENCIA ROJO PERSONALIZADO */
@@ -298,24 +418,10 @@
         .btn-modal-cancel { background: #6c757d; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
         .btn-modal-confirm { background: #dc3545; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
 
-        /* TABLA */
-        .table-container { width: 100%; background: transparent; overflow-x: auto; }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-        th, td { padding: 12px 15px; border-bottom: 1px solid #ddd; }
-        th { background-color: var(--primary-bg); color: var(--primary-color); font-weight: 700; }
-        .loading { padding: 30px; text-align: center; font-weight: bold; color: var(--primary-color); background: white; }
-
         @media print {
-            #login-screen, .header-actions, .controls-row, .refresh-btn, .title-bar, .card-form, .btn-delete, th:last-child, td:last-child { display: none !important; }
+            #login-screen, .header-actions, .controls-row, .refresh-btn, .title-bar, .card-form, .btn-delete { display: none !important; }
             #dashboard { display: block !important; width: 100%; }
+            .record-card { break-inside: avoid; border: 1px solid #ccc; box-shadow: none; margin-bottom: 15px; }
         }
     </style>
 </head>
@@ -435,7 +541,7 @@
                 <div class="controls-row">
                     <div class="search-container">
                         <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                        <input type="text" id="searchInput" class="search-input" oninput="filtrarTabla()" placeholder="Buscar paciente, DNI, diagnóstico...">
+                        <input type="text" id="searchInput" class="search-input" oninput="filtrarTarjetas()" placeholder="Buscar paciente, DNI, diagnóstico...">
                     </div>
                     <button class="print-btn" onclick="window.print()">Imprimir Filtrados</button>
                 </div>
@@ -443,14 +549,9 @@
             </div>
         </div>
 
-        <!-- TABLA DINÁMICA -->
-        <div class="table-container">
-            <table>
-                <thead id="table-head"></thead>
-                <tbody id="table-body">
-                    <tr><td colspan="11" class="loading">Cargando registros...</td></tr>
-                </tbody>
-            </table>
+        <!-- CONTENEDOR DE TARJETAS DE REGISTROS -->
+        <div class="cards-container" id="cardsContainer">
+            <div class="loading-card">Cargando registros...</div>
         </div>
     </div>
 
@@ -469,6 +570,7 @@
 
         let areaActual = "";
         let idParaEliminar = null;
+        let registrosCache = []; // Almacena los datos para el filtrado rápido
 
         function obtenerFechaHoraActual() {
             const ahora = new Date();
@@ -568,8 +670,7 @@
             });
         }
 
-        // Lógica de apertura del Modal de Advertencia de Eliminación
-        flotanteEliminar = function(idRegistro) {
+        function confirmarEliminar(idRegistro) {
             idParaEliminar = idRegistro;
             document.getElementById('modal-advertencia').style.display = 'flex';
         }
@@ -581,9 +682,6 @@
 
         document.getElementById('btnConfirmarEliminar').addEventListener('click', function() {
             if (!idParaEliminar) return;
-
-            const modalCard = document.querySelector('.modal-card');
-            modalCard.innerHTML = `<h3 style="color:#dc3545;">Eliminando...</h3><p>Por favor espere.</p>`;
 
             const datos = {
                 action: "delete",
@@ -598,12 +696,6 @@
             })
             .then(() => {
                 cerrarModal();
-                // Restaurar contenido modal original por si se abre luego
-                setTimeout(() => {
-                    modalCard.innerHTML = `<h3>⚠️ ADVERTENCIA CRÍTICA</h3><p>¿Estás seguro de eliminar este registro? <br><br><strong style="color: #dc3545;">¡No habrá manera de recuperarlo!</strong></p><div class="modal-buttons"><button class="btn-modal-cancel" onclick="cerrarModal()">Cancelar</button><button class="btn-modal-confirm" id="btnConfirmarEliminar">Sí, Eliminar Permanentemente</button></div>`;
-                    // Reasignar evento al botón recién creado
-                    document.getElementById('btnConfirmarEliminar').addEventListener('click', arguments.callee);
-                }, 300);
                 cargarDatosHistorial();
             })
             .catch(error => {
@@ -613,9 +705,8 @@
         });
 
         async function cargarDatosHistorial() {
-            const tbody = document.getElementById('table-body');
-            const thead = document.getElementById('table-head');
-            tbody.innerHTML = '<tr><td colspan="11" class="loading">Sincronizando con Google Sheets...</td></tr>';
+            const container = document.getElementById('cardsContainer');
+            container.innerHTML = '<div class="loading-card">Sincronizando con Google Sheets...</div>';
 
             const urlTabla = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gidSheet}&_=${new Date().getTime()}`;
 
@@ -625,61 +716,94 @@
                 const jsonString = text.substring(text.indexOf('({') + 1, text.lastIndexOf('})') + 1);
                 const data = JSON.parse(jsonString);
 
-                thead.innerHTML = '';
-                tbody.innerHTML = '';
-
-                // Crear cabeceras agregando la columna ACCIÓN
-                let trHead = document.createElement('tr');
-                data.table.cols.forEach(header => {
-                    if (header.label) {
-                        let th = document.createElement('th');
-                        th.innerText = header.label;
-                        trHead.appendChild(th);
-                    }
-                });
-                let thAccion = document.createElement('th');
-                thAccion.innerText = "ACCIONES";
-                trHead.appendChild(thAccion);
-                thead.appendChild(trHead);
-
-                const rows = data.table.rows.reverse();
-                if (rows.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="11" class="loading">No hay registros todavía.</td></tr>';
-                    return;
-                }
+                registrosCache = [];
+                const rows = data.table.rows.reverse(); // Últimos ingresos primero
 
                 rows.forEach(row => {
-                    let tr = document.createElement('tr');
-                    let idActual = "";
-                    
+                    let obj = {};
                     row.c.forEach((cell, index) => {
-                        if (index < data.table.cols.length && data.table.cols[index].label) {
-                            let td = document.createElement('td');
-                            let valorCelda = (cell && cell.f) ? cell.f : (cell && cell.v ? cell.v : '-');
-                            td.innerText = valorCelda;
-                            tr.appendChild(td);
-                            
-                            // Guardamos el ID (Columna 0) para el botón de eliminar
-                            if (index === 0) {
-                                idActual = valorCelda;
-                            }
-                        }
+                        let labelCol = data.table.cols[index] ? data.table.cols[index].label : '';
+                        let valor = (cell && cell.f) ? cell.f : (cell && cell.v ? cell.v : '-');
+                        obj[index] = valor;
                     });
-
-                    // Columna con botón de eliminar
-                    let tdAccion = document.createElement('td');
-                    let btnEliminar = document.createElement('button');
-                    btnEliminar.className = 'btn-delete';
-                    btnEliminar.innerText = 'Eliminar';
-                    btnEliminar.onclick = () => flotanteEliminar(idActual);
-                    tdAccion.appendChild(btnEliminar);
-                    tr.appendChild(tdAccion);
-
-                    tbody.appendChild(tr);
+                    registrosCache.push(obj);
                 });
+
+                renderizarTarjetas(registrosCache);
+
             } catch (error) {
-                tbody.innerHTML = '<tr><td colspan="11" class="loading" style="color:red;">Error al cargar la tabla.</td></tr>';
+                container.innerHTML = '<div class="loading-card" style="color:red;">Error al cargar los registros.</div>';
             }
+        }
+
+        function renderizarTarjetas(lista) {
+            const container = document.getElementById('cardsContainer');
+            container.innerHTML = '';
+
+            if (lista.length === 0) {
+                container.innerHTML = '<div class="loading-card">No hay registros todavía.</div>';
+                return;
+            }
+
+            lista.forEach(reg => {
+                let id = reg[0] || '-';
+                let fecha = reg[1] || '-';
+                let hInicio = reg[2] || '-';
+                let hFinal = reg[3] || '-';
+                let nombres = reg[4] || '-';
+                let dni = reg[5] || '-';
+                let diagnostico = reg[6] || '-';
+                let medicamentos = reg[7] || '-';
+                let medico = reg[8] || '-';
+                let observaciones = reg[9] || '-';
+
+                let card = document.createElement('div');
+                card.className = 'record-card';
+                card.innerHTML = `
+                    <div class="record-header">
+                        <span class="record-id">${id}</span>
+                        <span>📅 ${fecha} &nbsp;|&nbsp; ⏰ ${hInicio} - ${hFinal}</span>
+                    </div>
+                    <div class="record-patient-info">
+                        <div class="info-item">
+                            <span>Paciente</span>
+                            <strong>${nombres}</strong>
+                        </div>
+                        <div class="info-item">
+                            <span>DNI</span>
+                            <strong>${dni}</strong>
+                        </div>
+                    </div>
+                    <div class="record-details">
+                        <div class="detail-box">
+                            <label>Diagnóstico</label>
+                            <p>${diagnostico}</p>
+                        </div>
+                        <div class="detail-box">
+                            <label>Medicamentos / Receta</label>
+                            <p>${medicamentos}</p>
+                        </div>
+                        <div class="detail-box">
+                            <label>Observaciones</label>
+                            <p>${observaciones}</p>
+                        </div>
+                    </div>
+                    <div class="record-footer">
+                        <span class="medico-tag">Dr(a). ${medico}</span>
+                        <button class="btn-delete" onclick="confirmarEliminar('${id}')">Eliminar Registro</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function filtrarTarjetas() {
+            const filtro = document.getElementById('searchInput').value.toLowerCase();
+            const filtrados = registrosCache.filter(reg => {
+                let textoFila = Object.values(reg).join(' ').toLowerCase();
+                return textoFila.includes(filtro);
+            });
+            renderizarTarjetas(filtrados);
         }
 
         function cerrarSesion() {
