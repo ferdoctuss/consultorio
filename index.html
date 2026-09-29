@@ -187,10 +187,15 @@
             box-sizing: border-box;
         }
         .card-form h3 { margin-top: 0; color: var(--primary-color); }
+        
         .form-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: 1fr 1fr 1fr;
             gap: 15px;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
         }
 
         .controls-row {
@@ -327,44 +332,51 @@
                 <h3>Nuevo Registro Clínico</h3>
                 <form id="formRegistro" onsubmit="enviarDatos(event)">
                     <div class="form-grid">
+                        <!-- Fila 1: Fecha, Hora Inicio, Hora Final -->
                         <div class="form-group">
                             <label>Fecha:</label>
                             <input type="text" id="fecha" class="form-control" disabled style="background-color: #e9ecef; color: #6c757d;">
                         </div>
                         <div class="form-group">
                             <label>Hora de Inicio:</label>
-                            <input type="text" id="horaInicio" class="form-control" disabled style="background-color: #e9ecef; color: #6c757d;">
+                            <input type="time" id="horaInicio" class="form-control" required>
                         </div>
                         <div class="form-group">
                             <label>Hora Final:</label>
                             <input type="time" id="horaFinal" class="form-control" required>
                         </div>
-                        <div class="form-group">
+
+                        <!-- Fila 2: Nombres y Apellidos (Largo) -->
+                        <div class="form-group full-width">
                             <label>Nombres y Apellidos:</label>
-                            <input type="text" id="nombres" class="form-control" placeholder="Nombre completo" required>
+                            <input type="text" id="nombres" class="form-control" placeholder="Nombre completo del paciente" required>
                         </div>
-                        <div class="form-group">
+
+                        <!-- Fila 3: DNI -->
+                        <div class="form-group full-width">
                             <label>DNI:</label>
                             <input type="text" id="dni" class="form-control" maxlength="8" placeholder="DNI del paciente" required>
                         </div>
-                        <div class="form-group">
+
+                        <!-- Filas 4, 5, 6, 7: Diagnóstico, Medicamentos, Médico, Observaciones (Cada uno debajo del otro, largos) -->
+                        <div class="form-group full-width">
                             <label>Diagnóstico:</label>
                             <input type="text" id="diagnostico" class="form-control" placeholder="Diagnóstico médico" required>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group full-width">
                             <label>Medicamentos:</label>
                             <input type="text" id="medicamentos" class="form-control" placeholder="Receta o fármacos">
                         </div>
-                        <div class="form-group">
+                        <div class="form-group full-width">
                             <label>Médico:</label>
                             <input type="text" id="medico" class="form-control" placeholder="Nombre del doctor" required>
                         </div>
-                        <div class="form-group" style="grid-column: 1 / -1;">
+                        <div class="form-group full-width">
                             <label>Observaciones:</label>
                             <input type="text" id="observaciones" class="form-control" placeholder="Notas adicionales">
                         </div>
                     </div>
-                    <button type="submit" id="btnGuardar" class="btn-primary-login" style="margin-top: 15px;">Guardar Registro en Google Sheets</button>
+                    <button type="submit" id="btnGuardar" class="btn-primary-login" style="margin-top: 15px;">Subir a la Base de Datos</button>
                 </form>
                 <div id="msgEstado" style="text-align: center; margin-top: 10px; font-weight: bold;"></div>
             </div>
@@ -413,11 +425,17 @@
             const dia = String(ahora.getDate()).padStart(2, '0');
             const mes = String(ahora.getMonth() + 1).padStart(2, '0');
             const anio = ahora.getFullYear();
+            
+            // Fecha fija de hoy
+            document.getElementById('fecha').value = `${dia}/${mes}/${anio}`;
+            
+            // Hora actual predeterminada en los selectores de hora (formato HH:MM)
             const horas = String(ahora.getHours()).padStart(2, '0');
             const minutos = String(ahora.getMinutes()).padStart(2, '0');
+            const horaActualStr = `${horas}:${minutos}`;
             
-            document.getElementById('fecha').value = `${dia}/${mes}/${anio}`;
-            document.getElementById('horaInicio').value = `${horas}:${minutos}`;
+            document.getElementById('horaInicio').value = horaActualStr;
+            document.getElementById('horaFinal').value = horaActualStr;
         }
 
         function ejecutarLogin(event) {
@@ -460,7 +478,7 @@
             const msgEstado = document.getElementById('msgEstado');
             
             btnGuardar.disabled = true;
-            btnGuardar.textContent = 'Guardando en Sheets...';
+            btnGuardar.textContent = 'Subiendo a la Base de Datos...';
             msgEstado.style.color = '#555';
             msgEstado.textContent = 'Enviando información...';
 
@@ -484,7 +502,7 @@
             })
             .then(() => {
                 msgEstado.style.color = 'green';
-                msgEstado.textContent = '¡Registro guardado con éxito en Google Sheets!';
+                msgEstado.textContent = '¡Datos subidos con éxito a la Base de Datos!';
                 document.getElementById('formRegistro').reset();
                 obtenerFechaHoraActual();
                 setTimeout(() => { 
@@ -499,7 +517,7 @@
             })
             .finally(() => {
                 btnGuardar.disabled = false;
-                btnGuardar.textContent = 'Guardar Registro en Google Sheets';
+                btnGuardar.textContent = 'Subir a la Base de Datos';
             });
         }
 
