@@ -257,8 +257,49 @@
             margin-top: 10px;
         }
 
+        /* BOTÓN DE ELIMINAR EN TABLA */
+        .btn-delete {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .btn-delete:hover {
+            background-color: #bd2130;
+        }
+
+        /* MODAL DE ADVERTENCIA ROJO PERSONALIZADO */
+        #modal-advertencia {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+        }
+        .modal-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 400px;
+            text-align: center;
+            border-top: 5px solid #dc3545;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .modal-card h3 { color: #dc3545; margin-top: 0; }
+        .modal-card p { color: #333; font-size: 0.95rem; margin-bottom: 20px; }
+        .modal-buttons { display: flex; gap: 10px; justify-content: center; }
+        .btn-modal-cancel { background: #6c757d; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-modal-confirm { background: #dc3545; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+
         /* TABLA */
-        .table-container { width: 100%; background: transparent; }
+        .table-container { width: 100%; background: transparent; overflow-x: auto; }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -273,12 +314,24 @@
         .loading { padding: 30px; text-align: center; font-weight: bold; color: var(--primary-color); background: white; }
 
         @media print {
-            #login-screen, .header-actions, .controls-row, .refresh-btn, .title-bar, .card-form { display: none !important; }
+            #login-screen, .header-actions, .controls-row, .refresh-btn, .title-bar, .card-form, .btn-delete, th:last-child, td:last-child { display: none !important; }
             #dashboard { display: block !important; width: 100%; }
         }
     </style>
 </head>
 <body>
+
+    <!-- MODAL DE ADVERTENCIA ROJA -->
+    <div id="modal-advertencia">
+        <div class="modal-card">
+            <h3>⚠️ ADVERTENCIA CRÍTICA</h3>
+            <p>¿Estás seguro de eliminar este registro? <br><br><strong style="color: #dc3545;">¡No habrá manera de recuperarlo!</strong></p>
+            <div class="modal-buttons">
+                <button class="btn-modal-cancel" onclick="cerrarModal()">Cancelar</button>
+                <button class="btn-modal-confirm" id="btnConfirmarEliminar">Sí, Eliminar Permanentemente</button>
+            </div>
+        </div>
+    </div>
 
     <!-- 1. PANTALLA DE LOGIN -->
     <div id="login-screen">
@@ -309,7 +362,7 @@
                 </div>
 
                 <button type="submit" class="btn-primary-login">Ingresar al Sistema</button>
-                <div id="error-box" class="error-msg">ID, PIN o área incorrectos. Verifique sus datos.</div>
+                <div id="error-box" class="error-msg">ID, PIN o incorrectos. Verifique sus datos.</div>
             </form>
         </div>
     </div>
@@ -332,7 +385,6 @@
                 <h3>Nuevo Registro Clínico</h3>
                 <form id="formRegistro" onsubmit="enviarDatos(event)">
                     <div class="form-grid">
-                        <!-- Fila 1: Fecha, Hora Inicio, Hora Final -->
                         <div class="form-group">
                             <label>Fecha:</label>
                             <input type="text" id="fecha" class="form-control" disabled style="background-color: #e9ecef; color: #6c757d;">
@@ -346,19 +398,16 @@
                             <input type="time" id="horaFinal" class="form-control" required>
                         </div>
 
-                        <!-- Fila 2: Nombres y Apellidos (Largo) -->
                         <div class="form-group full-width">
                             <label>Nombres y Apellidos:</label>
                             <input type="text" id="nombres" class="form-control" placeholder="Nombre completo del paciente" required>
                         </div>
 
-                        <!-- Fila 3: DNI -->
                         <div class="form-group full-width">
                             <label>DNI:</label>
                             <input type="text" id="dni" class="form-control" maxlength="8" placeholder="DNI del paciente" required>
                         </div>
 
-                        <!-- Filas 4, 5, 6, 7: Diagnóstico, Medicamentos, Médico, Observaciones (Cada uno debajo del otro, largos) -->
                         <div class="form-group full-width">
                             <label>Diagnóstico:</label>
                             <input type="text" id="diagnostico" class="form-control" placeholder="Diagnóstico médico" required>
@@ -399,7 +448,7 @@
             <table>
                 <thead id="table-head"></thead>
                 <tbody id="table-body">
-                    <tr><td colspan="10" class="loading">Cargando registros...</td></tr>
+                    <tr><td colspan="11" class="loading">Cargando registros...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -419,6 +468,7 @@
         };
 
         let areaActual = "";
+        let idParaEliminar = null;
 
         function obtenerFechaHoraActual() {
             const ahora = new Date();
@@ -426,10 +476,8 @@
             const mes = String(ahora.getMonth() + 1).padStart(2, '0');
             const anio = ahora.getFullYear();
             
-            // Fecha fija de hoy
             document.getElementById('fecha').value = `${dia}/${mes}/${anio}`;
             
-            // Hora actual predeterminada en los selectores de hora (formato HH:MM)
             const horas = String(ahora.getHours()).padStart(2, '0');
             const minutos = String(ahora.getMinutes()).padStart(2, '0');
             const horaActualStr = `${horas}:${minutos}`;
@@ -513,7 +561,6 @@
             .catch(error => {
                 msgEstado.style.color = 'red';
                 msgEstado.textContent = 'Error al enviar datos.';
-                console.error(error);
             })
             .finally(() => {
                 btnGuardar.disabled = false;
@@ -521,10 +568,54 @@
             });
         }
 
+        // Lógica de apertura del Modal de Advertencia de Eliminación
+        flotanteEliminar = function(idRegistro) {
+            idParaEliminar = idRegistro;
+            document.getElementById('modal-advertencia').style.display = 'flex';
+        }
+
+        function cerrarModal() {
+            idParaEliminar = null;
+            document.getElementById('modal-advertencia').style.display = 'none';
+        }
+
+        document.getElementById('btnConfirmarEliminar').addEventListener('click', function() {
+            if (!idParaEliminar) return;
+
+            const modalCard = document.querySelector('.modal-card');
+            modalCard.innerHTML = `<h3 style="color:#dc3545;">Eliminando...</h3><p>Por favor espere.</p>`;
+
+            const datos = {
+                action: "delete",
+                id: idParaEliminar
+            };
+
+            fetch(scriptURL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(datos)
+            })
+            .then(() => {
+                cerrarModal();
+                // Restaurar contenido modal original por si se abre luego
+                setTimeout(() => {
+                    modalCard.innerHTML = `<h3>⚠️ ADVERTENCIA CRÍTICA</h3><p>¿Estás seguro de eliminar este registro? <br><br><strong style="color: #dc3545;">¡No habrá manera de recuperarlo!</strong></p><div class="modal-buttons"><button class="btn-modal-cancel" onclick="cerrarModal()">Cancelar</button><button class="btn-modal-confirm" id="btnConfirmarEliminar">Sí, Eliminar Permanentemente</button></div>`;
+                    // Reasignar evento al botón recién creado
+                    document.getElementById('btnConfirmarEliminar').addEventListener('click', arguments.callee);
+                }, 300);
+                cargarDatosHistorial();
+            })
+            .catch(error => {
+                alert("Error al intentar eliminar.");
+                cerrarModal();
+            });
+        });
+
         async function cargarDatosHistorial() {
             const tbody = document.getElementById('table-body');
             const thead = document.getElementById('table-head');
-            tbody.innerHTML = '<tr><td colspan="10" class="loading">Sincronizando con Google Sheets...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="11" class="loading">Sincronizando con Google Sheets...</td></tr>';
 
             const urlTabla = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gidSheet}&_=${new Date().getTime()}`;
 
@@ -537,6 +628,7 @@
                 thead.innerHTML = '';
                 tbody.innerHTML = '';
 
+                // Crear cabeceras agregando la columna ACCIÓN
                 let trHead = document.createElement('tr');
                 data.table.cols.forEach(header => {
                     if (header.label) {
@@ -545,27 +637,48 @@
                         trHead.appendChild(th);
                     }
                 });
+                let thAccion = document.createElement('th');
+                thAccion.innerText = "ACCIONES";
+                trHead.appendChild(thAccion);
                 thead.appendChild(trHead);
 
                 const rows = data.table.rows.reverse();
                 if (rows.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="10" class="loading">No hay registros todavía.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="11" class="loading">No hay registros todavía.</td></tr>';
                     return;
                 }
 
                 rows.forEach(row => {
                     let tr = document.createElement('tr');
+                    let idActual = "";
+                    
                     row.c.forEach((cell, index) => {
                         if (index < data.table.cols.length && data.table.cols[index].label) {
                             let td = document.createElement('td');
-                            td.innerText = (cell && cell.f) ? cell.f : (cell && cell.v ? cell.v : '-');
+                            let valorCelda = (cell && cell.f) ? cell.f : (cell && cell.v ? cell.v : '-');
+                            td.innerText = valorCelda;
                             tr.appendChild(td);
+                            
+                            // Guardamos el ID (Columna 0) para el botón de eliminar
+                            if (index === 0) {
+                                idActual = valorCelda;
+                            }
                         }
                     });
+
+                    // Columna con botón de eliminar
+                    let tdAccion = document.createElement('td');
+                    let btnEliminar = document.createElement('button');
+                    btnEliminar.className = 'btn-delete';
+                    btnEliminar.innerText = 'Eliminar';
+                    btnEliminar.onclick = () => flotanteEliminar(idActual);
+                    tdAccion.appendChild(btnEliminar);
+                    tr.appendChild(tdAccion);
+
                     tbody.appendChild(tr);
                 });
             } catch (error) {
-                tbody.innerHTML = '<tr><td colspan="10" class="loading" style="color:red;">Error al cargar la tabla.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="11" class="loading" style="color:red;">Error al cargar la tabla.</td></tr>';
             }
         }
 
