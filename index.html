@@ -116,7 +116,7 @@
         #dashboard {
             display: none;
             width: 100%;
-            max-width: 1350px; /* Ampliado para aprovechar monitores modernos 16:9 */
+            max-width: 1350px;
             flex-direction: column;
             align-items: center;
         }
@@ -190,14 +190,14 @@
         
         .form-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr); /* Organizado en 4 columnas fluidas para aprovechar el ancho */
+            grid-template-columns: repeat(4, 1fr);
             gap: 15px;
         }
 
         .span-1 { grid-column: span 1; }
         .span-2 { grid-column: span 2; }
         .span-3 { grid-column: span 3; }
-        .span-4 { grid-column: span 4; } /* Ocupa todo el ancho */
+        .span-4 { grid-column: span 4; }
 
         .controls-row {
             width: 100%;
@@ -419,7 +419,6 @@
         .btn-modal-cancel { background: #6c757d; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
         .btn-modal-confirm { background: #dc3545; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
 
-        /* Adaptación automática para pantallas móviles o tablets pequeñas */
         @media (max-width: 900px) {
             .form-grid { grid-template-columns: 1fr; }
             .span-1, .span-2, .span-3, .span-4 { grid-column: span 1; }
@@ -493,12 +492,16 @@
                 </div>
             </div>
 
-            <!-- FORMULARIO PARA NUEVO INGRESO DE DATOS AMPLIADO -->
+            <!-- FORMULARIO REORGANIZADO -->
             <div class="card-form" id="formRegistroContainer">
                 <h3>Nuevo Registro Clínico</h3>
                 <form id="formRegistro" onsubmit="enviarDatos(event)">
                     <div class="form-grid">
-                        <!-- Fila superior: Fecha, Hora Inicio, Hora Final -->
+                        <!-- Fila 1: ID (gris), Fecha (gris), Hora Inicio, Hora Final -->
+                        <div class="form-group span-1">
+                            <label>ID Automático:</label>
+                            <input type="text" id="idGenerado" class="form-control" disabled style="background-color: #e9ecef; color: #6c757d; font-weight: bold;">
+                        </div>
                         <div class="form-group span-1">
                             <label>Fecha:</label>
                             <input type="text" id="fecha" class="form-control" disabled style="background-color: #e9ecef; color: #6c757d;">
@@ -511,17 +514,18 @@
                             <label>Hora Final:</label>
                             <input type="time" id="horaFinal" class="form-control" required>
                         </div>
+
+                        <!-- Fila 2: Nombres y Apellidos (largo) + DNI (al costado) -->
+                        <div class="form-group span-3">
+                            <label>Nombres y Apellidos:</label>
+                            <input type="text" id="nombres" class="form-control" placeholder="Nombre completo del paciente" required>
+                        </div>
                         <div class="form-group span-1">
                             <label>DNI:</label>
                             <input type="text" id="dni" class="form-control" maxlength="8" placeholder="DNI del paciente" required>
                         </div>
 
-                        <!-- Siguientes campos distribuidos a lo ancho -->
-                        <div class="form-group span-4">
-                            <label>Nombres y Apellidos:</label>
-                            <input type="text" id="nombres" class="form-control" placeholder="Nombre completo del paciente" required>
-                        </div>
-
+                        <!-- Filas siguientes con ancho completo -->
                         <div class="form-group span-4">
                             <label>Diagnóstico:</label>
                             <input type="text" id="diagnostico" class="form-control" placeholder="Diagnóstico médico" required>
@@ -580,6 +584,17 @@
         let idParaEliminar = null;
         let registrosCache = [];
 
+        function generarIdTemporal() {
+            const ahora = new Date();
+            const anio = ahora.getFullYear();
+            const mes = String(ahora.getMonth() + 1).padStart(2, '0');
+            const dia = String(ahora.getDate()).padStart(2, '0');
+            const horas = String(ahora.getHours()).padStart(2, '0');
+            const minutos = String(ahora.getMinutes()).padStart(2, '0');
+            const segundos = String(ahora.getSeconds()).padStart(2, '0');
+            return `MED-${anio}${mes}${dia}-${horas}${minutos}${segundos}`;
+        }
+
         function obtenerFechaHoraActual() {
             const ahora = new Date();
             const dia = String(ahora.getDate()).padStart(2, '0');
@@ -587,6 +602,7 @@
             const anio = ahora.getFullYear();
             
             document.getElementById('fecha').value = `${dia}/${mes}/${anio}`;
+            document.getElementById('idGenerado').value = generarIdTemporal();
             
             const horas = String(ahora.getHours()).padStart(2, '0');
             const minutos = String(ahora.getMinutes()).padStart(2, '0');
