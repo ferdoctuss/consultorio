@@ -112,7 +112,7 @@
             font-weight: 600;
         }
 
-        /* === DASHBOARD GENERAL EXPANDIDO A LA PANTALLA === */
+        /* === DASHBOARD GENERAL === */
         #dashboard {
             display: none;
             width: 100%;
@@ -176,7 +176,7 @@
             text-decoration: none;
         }
 
-        /* SECCIÓN DE NUEVO REGISTRO (FORMULARIO) */
+        /* FORMULARIO */
         .card-form {
             background: white;
             padding: 25px;
@@ -195,7 +195,6 @@
         }
 
         .span-1 { grid-column: span 1; }
-        .span-2 { grid-column: span 2; }
         .span-3 { grid-column: span 3; }
         .span-4 { grid-column: span 4; }
 
@@ -258,7 +257,7 @@
             margin-top: 10px;
         }
 
-        /* === CONTENEDOR DE TARJETAS DE REGISTROS === */
+        /* TARJETAS */
         .cards-container {
             width: 100%;
             display: flex;
@@ -276,11 +275,6 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
-            transition: transform 0.2s;
-        }
-
-        .record-card:hover {
-            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
         }
 
         .record-header {
@@ -380,9 +374,7 @@
             font-weight: bold;
             transition: background 0.2s;
         }
-        .btn-delete:hover {
-            background-color: #bd2130;
-        }
+        .btn-delete:hover { background-color: #bd2130; }
 
         .loading-card {
             background: white;
@@ -394,7 +386,7 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
 
-        /* MODAL DE ADVERTENCIA ROJO PERSONALIZADO */
+        /* MODAL DE ADVERTENCIA */
         #modal-advertencia {
             display: none;
             position: fixed;
@@ -421,7 +413,7 @@
 
         @media (max-width: 900px) {
             .form-grid { grid-template-columns: 1fr; }
-            .span-1, .span-2, .span-3, .span-4 { grid-column: span 1; }
+            .span-1, .span-3, .span-4 { grid-column: span 1; }
         }
 
         @media print {
@@ -469,12 +461,11 @@
                         <option value="MEDICINA GENERAL">Medicina General</option>
                         <option value="ODONTOLOGIA">Odontología</option>
                         <option value="LABORATORIO">Laboratorio</option>
-                        <option value="BOTICA">Botica</option>
                     </select>
                 </div>
 
                 <button type="submit" class="btn-primary-login">Ingresar al Sistema</button>
-                <div id="error-box" class="error-msg">ID, PIN o incorrectos. Verifique sus datos.</div>
+                <div id="error-box" class="error-msg">ID o PIN incorrectos. Verifique sus datos.</div>
             </form>
         </div>
     </div>
@@ -492,7 +483,7 @@
                 </div>
             </div>
 
-            <!-- FORMULARIO REORGANIZADO -->
+            <!-- FORMULARIO -->
             <div class="card-form" id="formRegistroContainer">
                 <h3>Nuevo Registro Clínico</h3>
                 <form id="formRegistro" onsubmit="enviarDatos(event)">
@@ -558,7 +549,7 @@
             </div>
         </div>
 
-        <!-- CONTENEDOR DE TARJETAS DE REGISTROS -->
+        <!-- TARJETAS -->
         <div class="cards-container" id="cardsContainer">
             <div class="loading-card">Cargando registros...</div>
         </div>
@@ -567,14 +558,19 @@
     <!-- SCRIPT DE LA APLICACIÓN -->
     <script>
         const sheetId = '17OvVxayB1wjiB2z8RIGcc_S68F4AWstFZuLGWdctVNg';
-        const gidSheet = '0';
         const scriptURL = 'https://script.google.com/macros/s/AKfycbwQapil_hqSXDkIbMGG0LrKFExFw3gxTY7S634yvFhwkfP6zGyYBCaRRUQmDQ6MornZdA/exec';
+
+        // GIDs específicos para cada pestaña de tu Google Sheets
+        const gidsPorArea = {
+            "MEDICINA GENERAL": "0",
+            "ODONTOLOGIA": "123456789", // Reemplaza por el gid real de tu pestaña Odontología
+            "LABORATORIO": "987654321"  // Reemplaza por el gid real de tu pestaña Laboratorio
+        };
 
         const usuariosAutorizados = {
             "MEDICINA GENERAL": { "medico1": "1234", "drfernando": "5678" },
             "ODONTOLOGIA":      { "dentista1": "1111", "odonto": "2222" },
-            "LABORATORIO":      { "lab1": "3333" },
-            "BOTICA":           { "botica1": "4444" }
+            "LABORATORIO":      { "lab1": "3333" }
         };
 
         let areaActual = "";
@@ -654,6 +650,8 @@
             msgEstado.textContent = 'Enviando información...';
 
             const datos = {
+                area: areaActual,
+                id: document.getElementById('idGenerado').value,
                 fecha: document.getElementById('fecha').value,
                 horaInicio: document.getElementById('horaInicio').value,
                 horaFinal: document.getElementById('horaFinal').value,
@@ -706,6 +704,7 @@
 
             const datos = {
                 action: "delete",
+                area: areaActual,
                 id: idParaEliminar
             };
 
@@ -729,7 +728,8 @@
             const container = document.getElementById('cardsContainer');
             container.innerHTML = '<div class="loading-card">Sincronizando con Google Sheets...</div>';
 
-            const urlTabla = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gidSheet}&_=${new Date().getTime()}`;
+            const gidActual = gidsPorArea[areaActual] || "0";
+            const urlTabla = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gidActual}&_=${new Date().getTime()}`;
 
             try {
                 const response = await fetch(urlTabla);
@@ -740,9 +740,7 @@
                 registrosCache = [];
                 const rows = data.table.rows.reverse();
 
-                // Ignoramos la primera fila (índice 0) si contiene los títulos de las cabeceras
-                rows.forEach((row, index) => {
-                    // Verificamos si la primera celda es exactamente el título "ID" para evitar que se cuele
+                rows.forEach((row) => {
                     let primerValor = (row.c[0] && row.c[0].v) ? String(row.c[0].v) : '';
                     if (primerValor.toUpperCase() === 'ID') return; 
 
@@ -766,7 +764,7 @@
             container.innerHTML = '';
 
             if (lista.length === 0) {
-                container.innerHTML = '<div class="loading-card">No hay registros todavía.</div>';
+                container.innerHTML = '<div class="loading-card">No hay registros todavía en esta área.</div>';
                 return;
             }
 
