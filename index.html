@@ -560,7 +560,7 @@
         const sheetId = '17OvVxayB1wjiB2z8RIGcc_S68F4AWstFZuLGWdctVNg';
         const scriptURL = 'https://script.google.com/macros/s/AKfycbzDWDL7mWVaC1BPdHV6vOJkg27bu5p-LgjmMAY5czqw9cJKB9F6vfGc_q1UHi21F8TI/exec';
 
-        // GIDs específicos para cada pestaña
+        // GIDs específicos para cada pestaña de tu Google Sheets (Asegúrate de poner los GIDs correctos de Odontología y Laboratorio luego)
         const gidsPorArea = {
             "MEDICINA GENERAL": "0",
             "ODONTOLOGIA": "123456789", 
@@ -570,7 +570,6 @@
         let areaActual = "";
         let idParaEliminar = null;
         let registrosCache = [];
-        let timeoutSeguridad;
 
         function generarIdTemporal() {
             const ahora = new Date();
@@ -600,8 +599,8 @@
             document.getElementById('horaFinal').value = horaActualStr;
         }
 
-        // TÉCNICA JSONP - EVITA EL BLOQUEO DE CUALQUIER NAVEGADOR
-        function ejecutarLogin(event) {
+        // LÓGICA DE LOGIN EXACTAMENTE IGUAL A LA APP DE CITAS (SIN TIMEOUTS)
+        async function ejecutarLogin(event) {
             event.preventDefault();
             const idInput = document.getElementById('login-id').value.trim().toUpperCase();
             const pinInput = document.getElementById('login-pin').value.trim();
@@ -614,60 +613,46 @@
             btnLogin.disabled = true;
             errorBox.style.display = "none";
 
-            // Soporte maestro de seguridad
-            if (idInput === "USER" && pinInput === "171819") {
-                procesarRespuestaLogin({ status: "success" });
-                return;
-            }
+            try {
+                // Fetch simple y directo como en Citas Médicas
+                const response = await fetch(scriptURL + "?action=usuarios");
+                const usuarios = await response.json();
 
-            // Inyección de script externo (JSONP)
-            const script = document.createElement('script');
-            // Pasamos el usuario, pin, área y le decimos qué función de JavaScript debe ejecutar (procesarRespuestaLogin)
-            const urlValidacion = `${scriptURL}?action=login&usuario=${encodeURIComponent(idInput)}&pin=${encodeURIComponent(pinInput)}&area=${encodeURIComponent(areaActual)}&callback=procesarRespuestaLogin`;
-            
-            script.src = urlValidacion;
-            script.id = 'script-jsonp';
-            
-            // Tiempo límite de seguridad en caso de que no haya internet
-            timeoutSeguridad = setTimeout(() => {
-                const s = document.getElementById('script-jsonp');
-                if(s) s.remove();
-                
-                errorBox.innerHTML = "La base de datos demoró en responder. Reintente.";
+                let accesoConcedido = false;
+
+                if (idInput === "USER" && pinInput === "171819") {
+                    accesoConcedido = true;
+                } else {
+                    usuarios.forEach(u => {
+                        // Aquí verificamos que el usuario, el PIN y también el ÁREA coincidan
+                        if (u.usuario.toUpperCase() === idInput && String(u.pin) === String(pinInput) && u.area.toUpperCase() === areaActual.toUpperCase()) {
+                            accesoConcedido = true;
+                        }
+                    });
+                }
+
+                if (accesoConcedido) {
+                    errorBox.style.display = "none";
+                    document.getElementById('login-screen').style.display = 'none';
+                    document.getElementById('dashboard').style.display = 'flex';
+                    document.getElementById('header-badge').textContent = areaActual;
+                    document.getElementById('app-title-text').textContent = `Historial Clínico - ${areaActual}`;
+                    
+                    obtenerFechaHoraActual();
+                    cargarDatosHistorial();
+                } else {
+                    errorBox.textContent = "ID, PIN o Área incorrectos.";
+                    errorBox.style.display = "block";
+                }
+            } catch (error) {
+                console.error('Error al verificar login:', error);
+                errorBox.textContent = "Error al conectar con la base de datos de usuarios.";
                 errorBox.style.display = "block";
+            } finally {
                 btnLogin.innerText = "Ingresar al Sistema";
                 btnLogin.disabled = false;
-            }, 7000);
-
-            document.body.appendChild(script);
-        }
-
-        // Función que Google ejecutará automáticamente al responder el login
-        window.procesarRespuestaLogin = function(data) {
-            clearTimeout(timeoutSeguridad);
-            const scriptTag = document.getElementById('script-jsonp');
-            if(scriptTag) scriptTag.remove();
-
-            const errorBox = document.getElementById('error-box');
-            const btnLogin = document.getElementById('btnLoginSubmit');
-
-            if (data.status === "success") {
-                errorBox.style.display = "none";
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'flex';
-                document.getElementById('header-badge').textContent = areaActual;
-                document.getElementById('app-title-text').textContent = `Historial Clínico - ${areaActual}`;
-                
-                obtenerFechaHoraActual();
-                cargarDatosHistorial();
-            } else {
-                errorBox.textContent = "ID, PIN o Área incorrectos.";
-                errorBox.style.display = "block";
             }
-            
-            btnLogin.innerText = "Ingresar al Sistema";
-            btnLogin.disabled = false;
-        };
+        }
 
         function enviarDatos(event) {
             event.preventDefault();
@@ -863,6 +848,7 @@
             document.getElementById('dashboard').style.display = 'none';
             document.getElementById('login-screen').style.display = 'flex';
             
+            // Limpieza al cerrar sesión
             document.getElementById('login-id').value = '';
             document.getElementById('login-pin').value = '';
             document.getElementById('login-area').selectedIndex = 0;
