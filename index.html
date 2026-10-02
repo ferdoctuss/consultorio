@@ -613,50 +613,43 @@
             errorBox.style.display = "none";
 
             try {
-                // Consultamos directamente al Apps Script, el cual lee el IMPORTRANGE de forma segura.
-                const response = await fetch(scriptURL + "?action=usuarios");
-                const usuarios = await response.json();
-
-                let accesoConcedido = false;
-
+                // Soporte maestro USER
                 if (idInput === "USER" && pinInput === "171819") {
-                    accesoConcedido = true;
-                } else {
-                    // Revisa TODAS las filas donde aparece el usuario para validar su área
-                    usuarios.forEach(u => {
-                        if (u.usuario.toUpperCase() === idInput && String(u.pin) === String(pinInput) && u.area.toUpperCase() === areaActual.toUpperCase()) {
-                            accesoConcedido = true;
-                        }
-                    });
-                }
-
-                if (!accesoConcedido) {
-                    errorBox.textContent = "ID, PIN o Área incorrectos.";
-                    errorBox.style.display = "block";
-                    btnLogin.innerText = "Ingresar al Sistema";
-                    btnLogin.disabled = false;
+                    accederAlSistema();
                     return;
                 }
 
-                // Ingreso Exitoso
-                errorBox.style.display = "none";
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'flex';
-                document.getElementById('header-badge').textContent = areaActual;
-                document.getElementById('app-title-text').textContent = `Historial Clínico - ${areaActual}`;
+                // URL armada para hacer la consulta segura a Apps Script
+                const urlValidacion = `${scriptURL}?action=login&usuario=${encodeURIComponent(idInput)}&pin=${encodeURIComponent(pinInput)}&area=${encodeURIComponent(areaActual)}`;
                 
-                obtenerFechaHoraActual();
-                cargarDatosHistorial();
+                const response = await fetch(urlValidacion);
+                const data = await response.json();
 
+                if (data.status === "success") {
+                    accederAlSistema();
+                } else {
+                    errorBox.textContent = "ID, PIN o Área incorrectos.";
+                    errorBox.style.display = "block";
+                }
             } catch (error) {
                 console.error('Error al verificar login:', error);
-                errorBox.textContent = "Error al conectar con la base de datos de usuarios.";
+                errorBox.innerHTML = "Error de conexión.<br><small>Asegúrate de haber guardado como <b>NUEVA VERSIÓN</b> en Apps Script.</small>";
                 errorBox.style.display = "block";
             } finally {
-                // Siempre habilitar el botón nuevamente al terminar o fallar
                 btnLogin.innerText = "Ingresar al Sistema";
                 btnLogin.disabled = false;
             }
+        }
+        
+        function accederAlSistema() {
+            document.getElementById('error-box').style.display = "none";
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'flex';
+            document.getElementById('header-badge').textContent = areaActual;
+            document.getElementById('app-title-text').textContent = `Historial Clínico - ${areaActual}`;
+            
+            obtenerFechaHoraActual();
+            cargarDatosHistorial();
         }
 
         function enviarDatos(event) {
@@ -849,7 +842,6 @@
             renderizarTarjetas(filtrados);
         }
 
-        // --- ARREGLO PROBLEMA 2: LIMPIEZA TOTAL AL CERRAR SESIÓN ---
         function cerrarSesion() {
             document.getElementById('dashboard').style.display = 'none';
             document.getElementById('login-screen').style.display = 'flex';
