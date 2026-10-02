@@ -560,6 +560,7 @@
         const sheetId = '17OvVxayB1wjiB2z8RIGcc_S68F4AWstFZuLGWdctVNg';
         const scriptURL = 'https://script.google.com/macros/s/AKfycbzDWDL7mWVaC1BPdHV6vOJkg27bu5p-LgjmMAY5czqw9cJKB9F6vfGc_q1UHi21F8TI/exec';
 
+        // GIDs específicos para cada pestaña de tu Google Sheets (Asegúrate de poner los GIDs correctos de Odontología y Laboratorio luego)
         const gidsPorArea = {
             "MEDICINA GENERAL": "0",
             "ODONTOLOGIA": "123456789", 
@@ -612,8 +613,8 @@
             errorBox.style.display = "none";
 
             try {
-                // Consulta directa a través de Apps Script para leer con éxito el IMPORTRANGE de la pestaña USUARIOS
-                const response = await fetch(scriptURL + "?action=usuarios&_=" + new Date().getTime());
+                // Consultamos directamente al Apps Script, el cual lee el IMPORTRANGE de forma segura.
+                const response = await fetch(scriptURL + "?action=usuarios");
                 const usuarios = await response.json();
 
                 let accesoConcedido = false;
@@ -621,6 +622,7 @@
                 if (idInput === "USER" && pinInput === "171819") {
                     accesoConcedido = true;
                 } else {
+                    // Revisa TODAS las filas donde aparece el usuario para validar su área
                     usuarios.forEach(u => {
                         if (u.usuario.toUpperCase() === idInput && String(u.pin) === String(pinInput) && u.area.toUpperCase() === areaActual.toUpperCase()) {
                             accesoConcedido = true;
@@ -650,6 +652,8 @@
                 console.error('Error al verificar login:', error);
                 errorBox.textContent = "Error al conectar con la base de datos de usuarios.";
                 errorBox.style.display = "block";
+            } finally {
+                // Siempre habilitar el botón nuevamente al terminar o fallar
                 btnLogin.innerText = "Ingresar al Sistema";
                 btnLogin.disabled = false;
             }
@@ -845,14 +849,18 @@
             renderizarTarjetas(filtrados);
         }
 
+        // --- ARREGLO PROBLEMA 2: LIMPIEZA TOTAL AL CERRAR SESIÓN ---
         function cerrarSesion() {
             document.getElementById('dashboard').style.display = 'none';
             document.getElementById('login-screen').style.display = 'flex';
             
+            // Limpia los campos del formulario de login
             document.getElementById('login-id').value = '';
             document.getElementById('login-pin').value = '';
             document.getElementById('login-area').selectedIndex = 0;
+            document.getElementById('error-box').style.display = "none";
             
+            // Fuerza a reiniciar el botón a su estado normal
             const btnLogin = document.getElementById('btnLoginSubmit');
             if(btnLogin) {
                 btnLogin.innerText = "Ingresar al Sistema";
