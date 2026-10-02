@@ -446,7 +446,7 @@
             <form onsubmit="ejecutarLogin(event)">
                 <div class="form-group">
                     <label>ID de Usuario:</label>
-                    <input type="text" id="login-id" class="form-control" placeholder="Ej. USER o médico1" required>
+                    <input type="text" id="login-id" class="form-control" placeholder="Ej. MARTIN" required>
                 </div>
                 
                 <div class="form-group">
@@ -464,8 +464,8 @@
                     </select>
                 </div>
 
-                <button type="submit" class="btn-primary-login">Ingresar al Sistema</button>
-                <div id="error-box" class="error-msg">ID o PIN incorrectos. Verifique sus datos.</div>
+                <button type="submit" class="btn-primary-login" id="btnLoginSubmit">Ingresar al Sistema</button>
+                <div id="error-box" class="error-msg">ID, PIN o Área incorrectos.</div>
             </form>
         </div>
     </div>
@@ -558,19 +558,13 @@
     <!-- SCRIPT DE LA APLICACIÓN -->
     <script>
         const sheetId = '17OvVxayB1wjiB2z8RIGcc_S68F4AWstFZuLGWdctVNg';
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbwQapil_hqSXDkIbMGG0LrKFExFw3gxTY7S634yvFhwkfP6zGyYBCaRRUQmDQ6MornZdA/exec';
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbzDWDL7mWVaC1BPdHV6vOJkg27bu5p-LgjmMAY5czqw9cJKB9F6vfGc_q1UHi21F8TI/exec';
 
         // GIDs específicos para cada pestaña de tu Google Sheets
         const gidsPorArea = {
             "MEDICINA GENERAL": "0",
-            "ODONTOLOGIA": "123456789", // Reemplaza por el gid real de tu pestaña Odontología
-            "LABORATORIO": "987654321"  // Reemplaza por el gid real de tu pestaña Laboratorio
-        };
-
-        const usuariosAutorizados = {
-            "MEDICINA GENERAL": { "medico1": "1234", "drfernando": "5678" },
-            "ODONTOLOGIA":      { "dentista1": "1111", "odonto": "2222" },
-            "LABORATORIO":      { "lab1": "3333" }
+            "ODONTOLOGIA": "123456789", 
+            "LABORATORIO": "987654321"  
         };
 
         let areaActual = "";
@@ -605,38 +599,60 @@
             document.getElementById('horaFinal').value = horaActualStr;
         }
 
-        function ejecutarLogin(event) {
+        // Login consultando la pestaña USUARIOS de este mismo archivo de Excel
+        async function ejecutarLogin(event) {
             event.preventDefault();
-            const idInput = document.getElementById('login-id').value.trim();
+            const idInput = document.getElementById('login-id').value.trim().toUpperCase();
             const pinInput = document.getElementById('login-pin').value.trim();
             const selectArea = document.getElementById('login-area');
             const errorBox = document.getElementById('error-box');
+            const btnLogin = document.getElementById('btnLoginSubmit');
 
             areaActual = selectArea.value;
-            let accesoConcedido = false;
+            btnLogin.innerText = "Verificando...";
+            btnLogin.disabled = true;
 
-            if (idInput === "USER" && pinInput === "171819") {
-                accesoConcedido = true;
-            } else if (areaActual && usuariosAutorizados[areaActual]) {
-                if (usuariosAutorizados[areaActual][idInput] === pinInput) {
+            try {
+                const response = await fetch(scriptURL + "?action=usuarios");
+                const usuarios = await response.json();
+
+                let accesoConcedido = false;
+
+                // Soporte para usuario maestro USER / 171819 o lectura de la hoja USUARIOS
+                if (idInput === "USER" && pinInput === "171819") {
                     accesoConcedido = true;
+                } else {
+                    usuarios.forEach(u => {
+                        if (u.usuario.toUpperCase() === idInput && String(u.pin) === String(pinInput) && u.area.toUpperCase() === areaActual.toUpperCase()) {
+                            accesoConcedido = true;
+                        }
+                    });
                 }
-            }
 
-            if (!accesoConcedido) {
-                errorBox.textContent = "ID o PIN incorrectos.";
+                if (!accesoConcedido) {
+                    errorBox.textContent = "ID, PIN o Área incorrectos.";
+                    errorBox.style.display = "block";
+                    btnLogin.innerText = "Ingresar al Sistema";
+                    btnLogin.disabled = false;
+                    return;
+                }
+
+                errorBox.style.display = "none";
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'flex';
+                document.getElementById('header-badge').textContent = areaActual;
+                document.getElementById('app-title-text').textContent = `Historial Clínico - ${areaActual}`;
+                
+                obtenerFechaHoraActual();
+                cargarDatosHistorial();
+            } catch (error) {
+                console.error('Error al verificar login:', error);
+                errorBox.textContent = "Error al conectar con la base de datos de usuarios.";
                 errorBox.style.display = "block";
-                return;
+            } finally {
+                btnLogin.innerText = "Ingresar al Sistema";
+                btnLogin.disabled = false;
             }
-
-            errorBox.style.display = "none";
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('dashboard').style.display = 'flex';
-            document.getElementById('header-badge').textContent = areaActual;
-            document.getElementById('app-title-text').textContent = `Historial Clínico - ${areaActual}`;
-            
-            obtenerFechaHoraActual();
-            cargarDatosHistorial();
         }
 
         function enviarDatos(event) {
