@@ -560,7 +560,7 @@
         const sheetId = '17OvVxayB1wjiB2z8RIGcc_S68F4AWstFZuLGWdctVNg';
         const scriptURL = 'https://script.google.com/macros/s/AKfycbzDWDL7mWVaC1BPdHV6vOJkg27bu5p-LgjmMAY5czqw9cJKB9F6vfGc_q1UHi21F8TI/exec';
 
-        // GIDs específicos para cada pestaña de tu Google Sheets (Asegúrate de poner los GIDs correctos de Odontología y Laboratorio luego)
+        // GIDs específicos para cada pestaña de tu Google Sheets
         const gidsPorArea = {
             "MEDICINA GENERAL": "0",
             "ODONTOLOGIA": "123456789", 
@@ -599,7 +599,7 @@
             document.getElementById('horaFinal').value = horaActualStr;
         }
 
-        // LÓGICA DE LOGIN EXACTAMENTE IGUAL A LA APP DE CITAS (SIN TIMEOUTS)
+        // LÓGICA DE LOGIN EXACTAMENTE IGUAL A LA DE CITAS MÉDICAS
         async function ejecutarLogin(event) {
             event.preventDefault();
             const idInput = document.getElementById('login-id').value.trim().toUpperCase();
@@ -609,27 +609,36 @@
             const btnLogin = document.getElementById('btnLoginSubmit');
 
             areaActual = selectArea.value;
-            btnLogin.innerText = "Verificando...";
+            btnLogin.innerText = "Verificando base de datos...";
             btnLogin.disabled = true;
             errorBox.style.display = "none";
 
             try {
-                // Fetch simple y directo como en Citas Médicas
+                // Hacemos el Fetch idéntico a la app de Citas
                 const response = await fetch(scriptURL + "?action=usuarios");
                 const usuarios = await response.json();
 
+                // SEGURO ANTIBLOQUEOS: Si Google responde con el script viejo, te avisará exactamente qué hacer.
+                if (!Array.isArray(usuarios) || (usuarios.length > 0 && usuarios[0].status === "activo")) {
+                    errorBox.innerHTML = "<b>Falta actualizar el Script en Google:</b><br><small>Ve a Apps Script > Implementar > Administrar implementaciones > Editar > <b>NUEVA VERSIÓN</b>.</small>";
+                    errorBox.style.display = "block";
+                    btnLogin.innerText = "Ingresar al Sistema";
+                    btnLogin.disabled = false;
+                    return;
+                }
+
                 let accesoConcedido = false;
 
-                if (idInput === "USER" && pinInput === "171819") {
-                    accesoConcedido = true;
-                } else {
-                    usuarios.forEach(u => {
-                        // Aquí verificamos que el usuario, el PIN y también el ÁREA coincidan
-                        if (u.usuario.toUpperCase() === idInput && String(u.pin) === String(pinInput) && u.area.toUpperCase() === areaActual.toUpperCase()) {
-                            accesoConcedido = true;
-                        }
-                    });
-                }
+                // Leemos las 3 variables sin que choque la memoria
+                usuarios.forEach(u => {
+                    let uStr = u.usuario ? String(u.usuario).toUpperCase() : "";
+                    let pStr = u.pin ? String(u.pin) : "";
+                    let aStr = u.area ? String(u.area).toUpperCase() : "";
+
+                    if (uStr === idInput && pStr === pinInput && aStr === areaActual.toUpperCase()) {
+                        accesoConcedido = true;
+                    }
+                });
 
                 if (accesoConcedido) {
                     errorBox.style.display = "none";
@@ -645,8 +654,8 @@
                     errorBox.style.display = "block";
                 }
             } catch (error) {
-                console.error('Error al verificar login:', error);
-                errorBox.textContent = "Error al conectar con la base de datos de usuarios.";
+                console.error('Error de lectura:', error);
+                errorBox.textContent = "Error al conectar con Google Sheets.";
                 errorBox.style.display = "block";
             } finally {
                 btnLogin.innerText = "Ingresar al Sistema";
@@ -848,7 +857,7 @@
             document.getElementById('dashboard').style.display = 'none';
             document.getElementById('login-screen').style.display = 'flex';
             
-            // Limpieza al cerrar sesión
+            // Limpieza al cerrar sesión para que otro pueda entrar
             document.getElementById('login-id').value = '';
             document.getElementById('login-pin').value = '';
             document.getElementById('login-area').selectedIndex = 0;
