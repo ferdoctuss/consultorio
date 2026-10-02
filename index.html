@@ -429,7 +429,7 @@
     <!-- MODAL DE ADVERTENCIA ROJA -->
     <div id="modal-advertencia">
         <div class="modal-card">
-            <h3>⚠️ ADVERTENCIA CRÍTICA</h3>
+            <h3>⚠️️ ADVERTENCIA CRÍTICA</h3>
             <p>¿Estás seguro de eliminar este registro? <br><br><strong style="color: #dc3545;">¡No habrá manera de recuperarlo!</strong></p>
             <div class="modal-buttons">
                 <button class="btn-modal-cancel" onclick="cerrarModal()">Cancelar</button>
@@ -438,7 +438,7 @@
         </div>
     </div>
 
-    <!-- 1. PANTALLA DE LOGIN (SIMPLIFICADA: SOLO USUARIO Y PIN) -->
+    <!-- 1. PANTALLA DE LOGIN (IDÉNTICA A LA DE CITAS) -->
     <div id="login-screen">
         <div class="login-card">
             <h2>C.M.I. "Santa Celia"</h2>
@@ -469,7 +469,7 @@
                     <h1 id="app-title-text">Historial Clínico</h1>
                 </div>
                 <div class="header-actions">
-                    <!-- Selector de Área integrado en la cabecera -->
+                    <!-- Selector de Área en la barra superior -->
                     <select id="areaSelector" class="area-select-header" onchange="cambiarAreaTrabajo()">
                         <option value="MEDICINA GENERAL">Medicina General</option>
                         <option value="ODONTOLOGIA">Odontología</option>
@@ -556,7 +556,6 @@
         const sheetId = '17OvVxayB1wjiB2z8RIGcc_S68F4AWstFZuLGWdctVNg';
         const scriptURL = 'https://script.google.com/macros/s/AKfycbzDWDL7mWVaC1BPdHV6vOJkg27bu5p-LgjmMAY5czqw9cJKB9F6vfGc_q1UHi21F8TI/exec';
 
-        // GIDs específicos para cada pestaña de tu Google Sheets
         const gidsPorArea = {
             "MEDICINA GENERAL": "0",
             "ODONTOLOGIA": "123456789", 
@@ -595,13 +594,18 @@
             document.getElementById('horaFinal').value = horaActualStr;
         }
 
-        // LOGIN IDÉNTICO A LA APP DE CITAS (SOLO USUARIO Y PIN)
+        // LOGIN IDÉNTICO AL DE LA APP DE CITAS
         async function ejecutarLogin(event) {
             event.preventDefault();
             const idInput = document.getElementById('login-id').value.trim().toUpperCase();
             const pinInput = document.getElementById('login-pin').value.trim();
             const errorBox = document.getElementById('error-box');
             const btnLogin = document.getElementById('btnLoginSubmit');
+
+            if (!idInput || !pinInput) {
+                alert("Por favor ingrese usuario y PIN.");
+                return;
+            }
 
             btnLogin.innerText = "Verificando...";
             btnLogin.disabled = true;
@@ -611,24 +615,17 @@
                 const response = await fetch(scriptURL + "?action=usuarios");
                 const usuarios = await response.json();
 
-                let accesoConcedido = false;
+                let encontrado = false;
+                usuarios.forEach(u => {
+                    if (u.usuario.toUpperCase() === idInput && String(u.pin) === String(pinInput)) {
+                        encontrado = true;
+                    }
+                });
 
-                if (idInput === "USER" && pinInput === "171819") {
-                    accesoConcedido = true;
-                } else {
-                    usuarios.forEach(u => {
-                        if (u.usuario.toUpperCase() === idInput && String(u.pin) === String(pinInput)) {
-                            accesoConcedido = true;
-                        }
-                    });
-                }
-
-                if (accesoConcedido) {
-                    errorBox.style.display = "none";
+                if (encontrado) {
                     document.getElementById('login-screen').style.display = 'none';
                     document.getElementById('dashboard').style.display = 'flex';
                     
-                    // Sincronizar área por defecto
                     document.getElementById('areaSelector').value = areaActual;
                     document.getElementById('app-title-text').textContent = `Historial Clínico - ${areaActual}`;
                     
@@ -639,8 +636,8 @@
                     errorBox.style.display = "block";
                 }
             } catch (error) {
-                console.error('Error al verificar login:', error);
-                errorBox.textContent = "Error al conectar con la base de datos.";
+                console.error('Error:', error);
+                errorBox.textContent = "Error al verificar credenciales.";
                 errorBox.style.display = "block";
             } finally {
                 btnLogin.innerText = "Ingresar al Sistema";
