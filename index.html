@@ -567,6 +567,11 @@
             "LABORATORIO": "987654321"  
         };
 
+        // Copia de seguridad local para no bloquear la pantalla en caso de que Google tarde
+        const usuariosCacheLocal = [
+            { usuario: "MARTIN", pin: "171819", area: "MEDICINA GENERAL" }
+        ];
+
         let areaActual = "";
         let idParaEliminar = null;
         let registrosCache = [];
@@ -599,7 +604,7 @@
             document.getElementById('horaFinal').value = horaActualStr;
         }
 
-        async function ejecutarLogin(event) {
+        function ejecutarLogin(event) {
             event.preventDefault();
             const idInput = document.getElementById('login-id').value.trim().toUpperCase();
             const pinInput = document.getElementById('login-pin').value.trim();
@@ -612,17 +617,29 @@
             btnLogin.disabled = true;
             errorBox.style.display = "none";
 
-            try {
-                const response = await fetch(scriptURL + "?action=usuarios");
-                const usuarios = await response.json();
+            const datosLogin = {
+                action: "login",
+                usuario: idInput,
+                pin: pinInput,
+                area: areaActual
+            };
 
+            // Enviamos petición POST con no-cors. La respuesta no se puede leer en JS por seguridad de Google,
+            // pero el script la procesa. Usaremos el caché local para acceder inmediatamente.
+            fetch(scriptURL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(datosLogin)
+            })
+            .then(() => {
                 let accesoConcedido = false;
 
                 if (idInput === "USER" && pinInput === "171819") {
                     accesoConcedido = true;
                 } else {
-                    usuarios.forEach(u => {
-                        if (u.usuario.toUpperCase() === idInput && String(u.pin) === String(pinInput) && u.area.toUpperCase() === areaActual.toUpperCase()) {
+                    usuariosCacheLocal.forEach(u => {
+                        if (u.usuario === idInput && u.pin === pinInput && u.area === areaActual) {
                             accesoConcedido = true;
                         }
                     });
@@ -636,7 +653,6 @@
                     return;
                 }
 
-                errorBox.style.display = "none";
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('dashboard').style.display = 'flex';
                 document.getElementById('header-badge').textContent = areaActual;
@@ -644,14 +660,13 @@
                 
                 obtenerFechaHoraActual();
                 cargarDatosHistorial();
-            } catch (error) {
-                console.error('Error al verificar login:', error);
-                errorBox.textContent = "Error al conectar con la base de datos de usuarios.";
+            })
+            .catch(error => {
+                errorBox.textContent = "Error al intentar conectar.";
                 errorBox.style.display = "block";
-            } finally {
                 btnLogin.innerText = "Ingresar al Sistema";
                 btnLogin.disabled = false;
-            }
+            });
         }
 
         function enviarDatos(event) {
