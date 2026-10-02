@@ -560,7 +560,6 @@
         const sheetId = '17OvVxayB1wjiB2z8RIGcc_S68F4AWstFZuLGWdctVNg';
         const scriptURL = 'https://script.google.com/macros/s/AKfycbzDWDL7mWVaC1BPdHV6vOJkg27bu5p-LgjmMAY5czqw9cJKB9F6vfGc_q1UHi21F8TI/exec';
 
-        // GIDs específicos para cada pestaña de tu Google Sheets (Asegúrate de poner los GIDs correctos de Odontología y Laboratorio luego)
         const gidsPorArea = {
             "MEDICINA GENERAL": "0",
             "ODONTOLOGIA": "123456789", 
@@ -613,29 +612,17 @@
             errorBox.style.display = "none";
 
             try {
-                // Leemos la pestaña USUARIOS usando GVIZ directo desde Google Sheets, saltando el problema de Apps Script
-                const urlUsuarios = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=USUARIOS&_=${new Date().getTime()}`;
-                const response = await fetch(urlUsuarios);
-                const text = await response.text();
-                
-                const jsonString = text.substring(text.indexOf('({') + 1, text.lastIndexOf('})') + 1);
-                const data = JSON.parse(jsonString);
+                // Consulta directa a través de Apps Script para leer con éxito el IMPORTRANGE de la pestaña USUARIOS
+                const response = await fetch(scriptURL + "?action=usuarios&_=" + new Date().getTime());
+                const usuarios = await response.json();
 
                 let accesoConcedido = false;
 
                 if (idInput === "USER" && pinInput === "171819") {
                     accesoConcedido = true;
                 } else {
-                    // Iteramos todas las filas buscando coincidencias
-                    data.table.rows.forEach(row => {
-                        let u = row.c[0] && row.c[0].v ? String(row.c[0].v).trim().toUpperCase() : '';
-                        let p = row.c[1] && row.c[1].v ? String(row.c[1].v).trim() : '';
-                        let a = row.c[2] && row.c[2].v ? String(row.c[2].v).trim().toUpperCase() : '';
-
-                        if (u === 'USUARIO') return; // Saltamos encabezados
-
-                        // Validamos usuario, pin y que coincida el área seleccionada
-                        if (u === idInput && p === pinInput && a === areaActual.toUpperCase()) {
+                    usuarios.forEach(u => {
+                        if (u.usuario.toUpperCase() === idInput && String(u.pin) === String(pinInput) && u.area.toUpperCase() === areaActual.toUpperCase()) {
                             accesoConcedido = true;
                         }
                     });
@@ -661,10 +648,8 @@
 
             } catch (error) {
                 console.error('Error al verificar login:', error);
-                errorBox.textContent = "Error al leer hoja de USUARIOS.";
+                errorBox.textContent = "Error al conectar con la base de datos de usuarios.";
                 errorBox.style.display = "block";
-            } finally {
-                // Siempre habilitar el botón nuevamente al terminar
                 btnLogin.innerText = "Ingresar al Sistema";
                 btnLogin.disabled = false;
             }
@@ -860,17 +845,14 @@
             renderizarTarjetas(filtrados);
         }
 
-        // --- ARREGLO PROBLEMA 2: LIMPIEZA TOTAL AL CERRAR SESIÓN ---
         function cerrarSesion() {
             document.getElementById('dashboard').style.display = 'none';
             document.getElementById('login-screen').style.display = 'flex';
             
-            // Limpia los campos del formulario
             document.getElementById('login-id').value = '';
             document.getElementById('login-pin').value = '';
             document.getElementById('login-area').selectedIndex = 0;
             
-            // Fuerza a reiniciar el botón a su estado normal
             const btnLogin = document.getElementById('btnLoginSubmit');
             if(btnLogin) {
                 btnLogin.innerText = "Ingresar al Sistema";
