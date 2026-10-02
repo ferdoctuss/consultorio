@@ -599,7 +599,6 @@
             document.getElementById('horaFinal').value = horaActualStr;
         }
 
-        // Login consultando la pestaña USUARIOS de este mismo archivo de Excel
         async function ejecutarLogin(event) {
             event.preventDefault();
             const idInput = document.getElementById('login-id').value.trim().toUpperCase();
@@ -611,6 +610,7 @@
             areaActual = selectArea.value;
             btnLogin.innerText = "Verificando...";
             btnLogin.disabled = true;
+            errorBox.style.display = "none";
 
             try {
                 const response = await fetch(scriptURL + "?action=usuarios");
@@ -618,7 +618,6 @@
 
                 let accesoConcedido = false;
 
-                // Soporte para usuario maestro USER / 171819 o lectura de la hoja USUARIOS
                 if (idInput === "USER" && pinInput === "171819") {
                     accesoConcedido = true;
                 } else {
