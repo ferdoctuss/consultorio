@@ -438,7 +438,7 @@
         </div>
     </div>
 
-    <!-- 1. PANTALLA DE LOGIN (IDÉNTICA A LA DE CITAS) -->
+    <!-- 1. PANTALLA DE LOGIN -->
     <div id="login-screen">
         <div class="login-card">
             <h2>C.M.I. "Santa Celia"</h2>
@@ -469,7 +469,7 @@
                     <h1 id="app-title-text">Historial Clínico</h1>
                 </div>
                 <div class="header-actions">
-                    <!-- Selector de Área en la barra superior -->
+                    <!-- Selector de Área superior -->
                     <select id="areaSelector" class="area-select-header" onchange="cambiarAreaTrabajo()">
                         <option value="MEDICINA GENERAL">Medicina General</option>
                         <option value="ODONTOLOGIA">Odontología</option>
@@ -594,7 +594,6 @@
             document.getElementById('horaFinal').value = horaActualStr;
         }
 
-        // LOGIN IDÉNTICO AL DE LA APP DE CITAS
         async function ejecutarLogin(event) {
             event.preventDefault();
             const idInput = document.getElementById('login-id').value.trim().toUpperCase();
@@ -623,6 +622,7 @@
                 });
 
                 if (encontrado) {
+                    errorBox.style.display = "none";
                     document.getElementById('login-screen').style.display = 'none';
                     document.getElementById('dashboard').style.display = 'flex';
                     
