@@ -560,17 +560,12 @@
         const sheetId = '17OvVxayB1wjiB2z8RIGcc_S68F4AWstFZuLGWdctVNg';
         const scriptURL = 'https://script.google.com/macros/s/AKfycbzDWDL7mWVaC1BPdHV6vOJkg27bu5p-LgjmMAY5czqw9cJKB9F6vfGc_q1UHi21F8TI/exec';
 
-        // GIDs específicos para cada pestaña de tu Google Sheets
+        // GIDs específicos para cada pestaña de tu Google Sheets (Asegúrate de poner los GIDs correctos de Odontología y Laboratorio luego)
         const gidsPorArea = {
             "MEDICINA GENERAL": "0",
             "ODONTOLOGIA": "123456789", 
             "LABORATORIO": "987654321"  
         };
-
-        // Copia de seguridad local para no bloquear la pantalla en caso de que Google tarde
-        const usuariosCacheLocal = [
-            { usuario: "MARTIN", pin: "171819", area: "MEDICINA GENERAL" }
-        ];
 
         let areaActual = "";
         let idParaEliminar = null;
@@ -604,7 +599,7 @@
             document.getElementById('horaFinal').value = horaActualStr;
         }
 
-        function ejecutarLogin(event) {
+        async function ejecutarLogin(event) {
             event.preventDefault();
             const idInput = document.getElementById('login-id').value.trim().toUpperCase();
             const pinInput = document.getElementById('login-pin').value.trim();
@@ -617,29 +612,30 @@
             btnLogin.disabled = true;
             errorBox.style.display = "none";
 
-            const datosLogin = {
-                action: "login",
-                usuario: idInput,
-                pin: pinInput,
-                area: areaActual
-            };
+            try {
+                // Leemos la pestaña USUARIOS usando GVIZ directo desde Google Sheets, saltando el problema de Apps Script
+                const urlUsuarios = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=USUARIOS&_=${new Date().getTime()}`;
+                const response = await fetch(urlUsuarios);
+                const text = await response.text();
+                
+                const jsonString = text.substring(text.indexOf('({') + 1, text.lastIndexOf('})') + 1);
+                const data = JSON.parse(jsonString);
 
-            // Enviamos petición POST con no-cors. La respuesta no se puede leer en JS por seguridad de Google,
-            // pero el script la procesa. Usaremos el caché local para acceder inmediatamente.
-            fetch(scriptURL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(datosLogin)
-            })
-            .then(() => {
                 let accesoConcedido = false;
 
                 if (idInput === "USER" && pinInput === "171819") {
                     accesoConcedido = true;
                 } else {
-                    usuariosCacheLocal.forEach(u => {
-                        if (u.usuario === idInput && u.pin === pinInput && u.area === areaActual) {
+                    // Iteramos todas las filas buscando coincidencias
+                    data.table.rows.forEach(row => {
+                        let u = row.c[0] && row.c[0].v ? String(row.c[0].v).trim().toUpperCase() : '';
+                        let p = row.c[1] && row.c[1].v ? String(row.c[1].v).trim() : '';
+                        let a = row.c[2] && row.c[2].v ? String(row.c[2].v).trim().toUpperCase() : '';
+
+                        if (u === 'USUARIO') return; // Saltamos encabezados
+
+                        // Validamos usuario, pin y que coincida el área seleccionada
+                        if (u === idInput && p === pinInput && a === areaActual.toUpperCase()) {
                             accesoConcedido = true;
                         }
                     });
@@ -653,6 +649,8 @@
                     return;
                 }
 
+                // Ingreso Exitoso
+                errorBox.style.display = "none";
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('dashboard').style.display = 'flex';
                 document.getElementById('header-badge').textContent = areaActual;
@@ -660,13 +658,16 @@
                 
                 obtenerFechaHoraActual();
                 cargarDatosHistorial();
-            })
-            .catch(error => {
-                errorBox.textContent = "Error al intentar conectar.";
+
+            } catch (error) {
+                console.error('Error al verificar login:', error);
+                errorBox.textContent = "Error al leer hoja de USUARIOS.";
                 errorBox.style.display = "block";
+            } finally {
+                // Siempre habilitar el botón nuevamente al terminar
                 btnLogin.innerText = "Ingresar al Sistema";
                 btnLogin.disabled = false;
-            });
+            }
         }
 
         function enviarDatos(event) {
@@ -859,11 +860,22 @@
             renderizarTarjetas(filtrados);
         }
 
+        // --- ARREGLO PROBLEMA 2: LIMPIEZA TOTAL AL CERRAR SESIÓN ---
         function cerrarSesion() {
             document.getElementById('dashboard').style.display = 'none';
             document.getElementById('login-screen').style.display = 'flex';
+            
+            // Limpia los campos del formulario
             document.getElementById('login-id').value = '';
             document.getElementById('login-pin').value = '';
+            document.getElementById('login-area').selectedIndex = 0;
+            
+            // Fuerza a reiniciar el botón a su estado normal
+            const btnLogin = document.getElementById('btnLoginSubmit');
+            if(btnLogin) {
+                btnLogin.innerText = "Ingresar al Sistema";
+                btnLogin.disabled = false;
+            }
         }
     </script>
 </body>
