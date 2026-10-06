@@ -556,15 +556,10 @@
         const sheetId = '17OvVxayB1wjiB2z8RIGcc_S68F4AWstFZuLGWdctVNg';
         const scriptURL = 'https://script.google.com/macros/s/AKfycbzDWDL7mWVaC1BPdHV6vOJkg27bu5p-LgjmMAY5czqw9cJKB9F6vfGc_q1UHi21F8TI/exec';
 
-        const gidsPorArea = {
-            "MEDICINA GENERAL": "0",
-            "ODONTOLOGIA": "123456789", 
-            "LABORATORIO": "987654321"  
-        };
-
         let areaActual = "MEDICINA GENERAL";
         let idParaEliminar = null;
         let registrosCache = [];
+        let usuarioActualNombre = "";
 
         function generarIdTemporal() {
             const ahora = new Date();
@@ -592,6 +587,7 @@
             
             document.getElementById('horaInicio').value = horaActualStr;
             document.getElementById('horaFinal').value = horaActualStr;
+            document.getElementById('medico').value = usuarioActualNombre;
         }
 
         async function ejecutarLogin(event) {
@@ -611,25 +607,14 @@
             errorBox.style.display = "none";
 
             try {
-                // Lectura directa y segura mediante gviz desde la hoja USUARIOS
-                const urlUsuarios = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=USUARIOS&_=${new Date().getTime()}`;
-
-                const response = await fetch(urlUsuarios);
-                const text = await response.text();
-                const jsonString = text.substring(text.indexOf('({') + 1, text.lastIndexOf('})') + 1);
-                const data = JSON.parse(jsonString);
+                const response = await fetch(scriptURL + "?action=usuarios");
+                const usuarios = await response.json();
 
                 let encontrado = false;
-                const rows = data.table.rows;
-
-                rows.forEach((row) => {
-                    let uVal = (row.c[0] && row.c[0].v) ? String(row.c[0].v).trim().toUpperCase() : '';
-                    let pVal = (row.c[1] && row.c[1].v) !== undefined && (row.c[1] && row.c[1].v) !== null ? String(row.c[1].v).trim() : '';
-
-                    if (uVal === 'USUARIO') return; // Ignorar cabecera
-
-                    if (uVal === idInput && pVal === pinInput) {
+                usuarios.forEach(u => {
+                    if (u.usuario.toUpperCase() === idInput && String(u.pin) === String(pinInput)) {
                         encontrado = true;
+                        usuarioActualNombre = u.nombre || idInput;
                     }
                 });
 
@@ -752,29 +737,14 @@
             const container = document.getElementById('cardsContainer');
             container.innerHTML = '<div class="loading-card">Sincronizando con Google Sheets...</div>';
 
-            const gidActual = gidsPorArea[areaActual] || "0";
-            const urlTabla = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gidActual}&_=${new Date().getTime()}`;
-
             try {
-                const response = await fetch(urlTabla);
-                const text = await response.text();
-                const jsonString = text.substring(text.indexOf('({') + 1, text.lastIndexOf('})') + 1);
-                const data = JSON.parse(jsonString);
+                const response = await fetch(`${scriptURL}?area=${encodeURIComponent(areaActual)}&_=${new Date().getTime()}`);
+                const data = await response.json();
 
                 registrosCache = [];
-                const rows = data.table.rows.reverse();
-
-                rows.forEach((row) => {
-                    let primerValor = (row.c[0] && row.c[0].v) ? String(row.c[0].v) : '';
-                    if (primerValor.toUpperCase() === 'ID') return; 
-
-                    let obj = {};
-                    row.c.forEach((cell, cellIndex) => {
-                        let valor = (cell && cell.f) ? cell.f : (cell && cell.v ? cell.v : '-');
-                        obj[cellIndex] = valor;
-                    });
-                    registrosCache.push(obj);
-                });
+                if (data && data.length > 0) {
+                    registrosCache = data.reverse();
+                }
 
                 renderizarTarjetas(registrosCache);
 
@@ -793,16 +763,16 @@
             }
 
             lista.forEach(reg => {
-                let id = reg[0] || '-';
-                let fecha = reg[1] || '-';
-                let hInicio = reg[2] || '-';
-                let hFinal = reg[3] || '-';
-                let nombres = reg[4] || '-';
-                let dni = reg[5] || '-';
-                let diagnostico = reg[6] || '-';
-                let medicamentos = reg[7] || '-';
-                let medico = reg[8] || '-';
-                let observaciones = reg[9] || '-';
+                let id = reg.id || '-';
+                let fecha = reg.fecha || '-';
+                let hInicio = reg.horaInicio || '-';
+                let hFinal = reg.horaFinal || '-';
+                let nombres = reg.nombres || '-';
+                let dni = reg.dni || '-';
+                let diagnostico = reg.diagnostico || '-';
+                let medicamentos = reg.medicamentos || '-';
+                let medico = reg.medico || '-';
+                let observaciones = reg.observaciones || '-';
 
                 let card = document.createElement('div');
                 card.className = 'record-card';
