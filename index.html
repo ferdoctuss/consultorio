@@ -429,7 +429,7 @@
     <!-- MODAL DE ADVERTENCIA ROJA -->
     <div id="modal-advertencia">
         <div class="modal-card">
-            <h3>⚠️️ ADVERTENCIA CRÍTICA</h3>
+            <h3>⚠ ADVERTENCIA CRÍTICA</h3>
             <p>¿Estás seguro de eliminar este registro? <br><br><strong style="color: #dc3545;">¡No habrá manera de recuperarlo!</strong></p>
             <div class="modal-buttons">
                 <button class="btn-modal-cancel" onclick="cerrarModal()">Cancelar</button>
@@ -611,12 +611,24 @@
             errorBox.style.display = "none";
 
             try {
-                const response = await fetch(scriptURL + "?action=usuarios");
-                const usuarios = await response.json();
+                // Lectura directa y segura mediante gviz desde la hoja USUARIOS
+                const urlUsuarios = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=USUARIOS&_=${new Date().getTime()}`;
+
+                const response = await fetch(urlUsuarios);
+                const text = await response.text();
+                const jsonString = text.substring(text.indexOf('({') + 1, text.lastIndexOf('})') + 1);
+                const data = JSON.parse(jsonString);
 
                 let encontrado = false;
-                usuarios.forEach(u => {
-                    if (u.usuario.toUpperCase() === idInput && String(u.pin) === String(pinInput)) {
+                const rows = data.table.rows;
+
+                rows.forEach((row) => {
+                    let uVal = (row.c[0] && row.c[0].v) ? String(row.c[0].v).trim().toUpperCase() : '';
+                    let pVal = (row.c[1] && row.c[1].v) !== undefined && (row.c[1] && row.c[1].v) !== null ? String(row.c[1].v).trim() : '';
+
+                    if (uVal === 'USUARIO') return; // Ignorar cabecera
+
+                    if (uVal === idInput && pVal === pinInput) {
                         encontrado = true;
                     }
                 });
